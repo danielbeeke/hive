@@ -2,18 +2,23 @@ export class Insect extends HTMLElement {
   constructor() {
     super();
 
-    let insectName = this.constructor.name.toLowerCase();
-    this.classList.add(insectName, 'insect');
+    this.insectName = this.constructor.name.toLowerCase();
 
     let hexagon = `<svg class="hexagon-svg" viewBox="0 0 300 260">
       <polygon class="hexagon" points="300,130 225,260 75,260 0,130 75,0 225,0"></polygon>
     </svg>`;
 
-    if (!this.getAttribute('player')) this.setAttribute('player', 1);
+    if (['highlight'].includes(this.insectName)) {
+      this.innerHTML = hexagon;
+    } else {
+      fetch(`/svg/${this.insectName}.svg`)
+        .then(response => response.text())
+        .then(svg => this.innerHTML = hexagon + svg);
+    }
+  }
 
-    fetch(`/svg/${insectName}.svg`)
-      .then(response => response.text())
-      .then(svg => this.innerHTML = hexagon + svg);
+  connectedCallback() {
+    this.classList.add(this.insectName, 'insect');
   }
 
   static get observedAttributes() {
