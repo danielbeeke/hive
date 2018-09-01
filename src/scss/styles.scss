@@ -1,0 +1,14 @@
+@import 'functions/**/*';
+@import 'variables';
+@import 'components/**/*';
+
+html {
+  height: 100%;
+}
+
+body {
+  background-color: gray;
+  padding: 0;
+  margin: 0;
+  height: 100%;
+}

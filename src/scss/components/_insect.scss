@@ -1,0 +1,44 @@
+.insect {
+  height: calc(#{sqrt(3)} * var(--hexagon-size));
+  width: calc(var(--hexagon-size) * 2);
+  display: block;
+  position: relative;
+
+  &[player="1"] .hexagon {
+    fill: var(--player-1);
+  }
+
+  &[player="2"] .hexagon {
+    fill: var(--player-2);
+  }
+
+  svg:not(.hexagon-svg) {
+    position: absolute;
+    pointer-events: none;
+    width: 60%;
+    height: 60%;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    object-fit: contain;
+  }
+
+  .hexagon {
+    cursor: pointer;
+    stroke-width: 10;
+    stroke: transparent;
+    transition: stroke var(--speed) var(--easing);
+  }
+
+  &[player="1"] .hexagon:hover {
+    stroke: var(--player-highlight-1);
+  }
+
+  &[player="2"] .hexagon:hover {
+    stroke: var(--player-highlight-2);
+  }
+
+  &.highlight {
+    opacity: .3;
+  }
+}
