@@ -43,6 +43,20 @@ export class Insect extends HTMLElement {
             });
           });
         }
+
+        // Other turns.
+        else if (['attachPiece', 'movePiece'].includes(playerState) && ['attachPiece', 'movePiece'].includes(otherPlayerState)) {
+          // New piece to attach.
+          if (this.parentNode !== this.board) {
+            this.highlightAttachTiles((clickedProposed) => {
+              this.state.transition(this.player, 'attachPiece', {
+                piece: this,
+                row: clickedProposed.row,
+                column: clickedProposed.column
+              });
+            });
+          }
+        }
       });
     }
   }
@@ -107,6 +121,28 @@ export class Insect extends HTMLElement {
   }
 
   highlightNeighbours(callback) {
+    let neighbours = [
+      { column: this.column, row: this.row - 1 },
+      { column: this.column - 1, row: this.row },
+      { column: this.column + 1, row: this.row },
+      { column: this.column, row: this.row + 1 },
+      { column: this.column - 1, row: this.row + 1 },
+      { column: this.column + 1, row: this.row + 1 },
+    ];
+
+    neighbours.forEach((neighbour) => {
+      let pieceToAttach = document.createElement('hive-proposed');
+      pieceToAttach.column = neighbour.column;
+      pieceToAttach.row = neighbour.row;
+      this.board.appendChild(pieceToAttach);
+
+      pieceToAttach.addEventListener('click', () => {
+        callback(pieceToAttach);
+      });
+    });
+  }
+
+  highlightAttachTiles(callback) {
     let neighbours = [
       { column: this.column, row: this.row - 1 },
       { column: this.column - 1, row: this.row },
