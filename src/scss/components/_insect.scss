@@ -30,15 +30,19 @@
     transition: stroke var(--speed) var(--easing);
   }
 
+  &[player="1"].selected .hexagon,
   &[player="1"] .hexagon:hover {
     stroke: var(--player-highlight-1);
   }
 
+  &[player="2"].selected .hexagon,
   &[player="2"] .hexagon:hover {
     stroke: var(--player-highlight-2);
   }
 
-  &.highlight {
-    opacity: .3;
+  &.proposed .hexagon {
+    fill: rgba(white, .3);
+    stroke: rgba(white, .5);
+    stroke-width: 2;
   }
 }
