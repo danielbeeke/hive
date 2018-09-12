@@ -9,6 +9,12 @@ customElements.define('hive-board', class HiveBoard extends HTMLElement {
 
   cleanUpHighlights() {
     let highlights = Array.from(this.children).filter(child => child.constructor.name === 'Proposed');
-    highlights.forEach(highlight => highlight.remove());
+    highlights.forEach(highlight => {
+      highlight.oneTransitionEnd('opacity', () => {
+        highlight.remove();
+      });
+
+      highlight.classList.add('fade-out');
+    });
   }
 });

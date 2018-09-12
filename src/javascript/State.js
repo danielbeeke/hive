@@ -51,24 +51,32 @@ export class State {
       this.setPlayerState(playerId, state);
       this.serializeturn();
     }
-
-    console.log(this.states)
   }
 
   attachPiece(state, data) {
     let piece = data.piece;
+
+    let clonedPiece = piece.cloneNode(true);
+    clonedPiece.style.position = 'fixed';
+    let clientRect = piece.getBoundingClientRect();
+    clonedPiece.style.transform = `translate(${clientRect.left}px, ${clientRect.top}px)`;
+    document.body.appendChild(clonedPiece);
+
+    this.board.appendChild(piece);
     piece.row = data.row;
     piece.column = data.column;
 
     piece.deselect();
-    this.board.appendChild(piece);
     this.board.cleanUpHighlights();
 
-    let otherPlayer = piece.player === 1 ? 2 : 1;
-    let playerState = this.getPlayerState(this.player);
-    let otherPlayerState = this.getPlayerState(otherPlayer);
+    clientRect = piece.getBoundingClientRect();
+    clonedPiece.oneTransitionEnd('transform', () => {
+      this.board.appendChild(piece);
+      clonedPiece.remove();
+    });
+    clonedPiece.style.transform = `translate(${clientRect.left}px, ${clientRect.top}px)`;
 
-    console.log(piece.player, otherPlayer)
+    piece.remove();
   }
 
   serializeturn() {

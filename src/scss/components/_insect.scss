@@ -3,6 +3,9 @@
   width: calc(var(--hexagon-size) * 2);
   display: block;
   position: relative;
+  top: 0;
+  left: 0;
+  transition: all .6s ease-in-out;
 
   &[player="1"] .hexagon {
     fill: var(--player-1);
@@ -12,11 +15,11 @@
     fill: var(--player-2);
   }
 
-  svg:not(.hexagon-svg) {
+  img {
     position: absolute;
     pointer-events: none;
-    width: 60%;
-    height: 60%;
+    width: 90%;
+    height: 90%;
     left: 50%;
     top: 50%;
     transform: translate(-50%, -50%);
@@ -40,9 +43,35 @@
     stroke: var(--player-highlight-2);
   }
 
-  &.proposed .hexagon {
-    fill: rgba(white, .3);
-    stroke: rgba(white, .5);
-    stroke-width: 2;
+  &.proposed {
+    opacity: 1;
+    animation: fadeIn .3s;
+    transition: opacity .3s ease-in-out;
+
+    .hexagon {
+      fill: rgba(white, .3);
+      stroke: rgba(white, .5);
+      stroke-width: 2;
+      transition: fill .3s ease-in-out;
+    }
+
+    &:hover .hexagon {
+      fill: rgba(white, .8);
+    }
+
+    &.fade-out {
+      opacity: 0;
+    }
+  }
+
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
   }
 }

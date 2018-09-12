@@ -1,8 +1,4 @@
 export class Insect extends HTMLElement {
-  constructor() {
-    super();
-
-  }
 
   connectedCallback() {
     this.insectName = this.constructor.name.toLowerCase();
@@ -15,9 +11,7 @@ export class Insect extends HTMLElement {
     if (['proposed'].includes(this.insectName)) {
       this.innerHTML = hexagon;
     } else {
-      fetch(`/svg/${this.insectName}.svg`)
-        .then(response => response.text())
-        .then(svg => this.innerHTML = hexagon + svg);
+      this.innerHTML = hexagon + `<img src="/images/${this.insectName}.png">`
     }
 
     this.classList.add(this.insectName, 'insect');
