@@ -7,7 +7,7 @@ export class State {
       player2: 'emptyBoard'
     };
 
-    this.currentPlayer = 1;
+    this.currentPlayer = false;
 
     this.transitions = {
       'emptyBoard': ['attachPiece'],
@@ -33,7 +33,10 @@ export class State {
    * @param {*} data
    */
   transition(playerId, state, data) {
+    if (!this.currentPlayer) this.currentPlayer = playerId;
+
     let currentState = this.getPlayerState(playerId);
+    let otherPlayer = playerId === 1 ? 2 : 1;
 
     if (!this.transitions[currentState].includes(state)) {
       console.warn('The transition is not allowed');
@@ -49,20 +52,31 @@ export class State {
 
       this[state](state, data);
       this.setPlayerState(playerId, state);
+      this.currentPlayer = otherPlayer;
       this.serializeturn();
     }
+
+    console.log(this.states, this.currentPlayer);
   }
 
   attachPiece(state, data) {
     let piece = data.piece;
 
     let clonedPiece = piece.cloneNode(true);
+    let clonedPieceForPlayer = piece.cloneNode(true);
     clonedPiece.style.position = 'fixed';
     let clientRect = piece.getBoundingClientRect();
     clonedPiece.style.transform = `translate(${clientRect.left}px, ${clientRect.top}px)`;
     document.body.appendChild(clonedPiece);
 
+    piece.parentNode.insertBefore(clonedPieceForPlayer, piece.nextSibling);
     this.board.appendChild(piece);
+
+    clonedPieceForPlayer.oneAnimationEnd('disappear', () => {
+      clonedPieceForPlayer.remove();
+    })
+    clonedPieceForPlayer.classList.add('disappear');
+
     piece.row = data.row;
     piece.column = data.column;
 

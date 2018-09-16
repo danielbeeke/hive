@@ -1,3 +1,27 @@
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes disappear {
+  from {
+    opacity: 0;
+    max-width: calc(var(--hexagon-size) * 2);
+    margin: 0 10px;
+  }
+
+  to {
+    opacity: 0;
+    max-width: 0;
+    margin: 0 0;
+  }
+}
+
 .insect {
   height: calc(#{sqrt(3)} * var(--hexagon-size));
   width: calc(var(--hexagon-size) * 2);
@@ -5,8 +29,19 @@
   position: relative;
   top: 0;
   left: 0;
-  transition: all .6s ease-in-out;
+  transition: opacity .6s ease-in-out,
+    transform .6s ease-in-out;
   user-select: none;
+
+  .debug {
+    position: absolute;
+    top: 50%;
+    left: 10px;
+    font-size: 10px;
+    width: 20px;
+    transform: translateY(-50%);
+    color: black;
+  }
 
   &[player="1"] .hexagon {
     fill: var(--player-1);
@@ -19,8 +54,8 @@
   img {
     position: absolute;
     pointer-events: none;
-    width: 90%;
-    height: 90%;
+    width: 95%;
+    height: 95%;
     left: 50%;
     top: 50%;
     transform: translate(-50%, -50%);
@@ -29,19 +64,19 @@
 
   .hexagon {
     cursor: pointer;
-    stroke-width: 10;
-    stroke: transparent;
+    // stroke-width: 6;
+    // stroke: transparent;
     transition: stroke var(--speed) var(--easing);
   }
 
   &[player="1"].selected .hexagon,
   &[player="1"] .hexagon:hover {
-    stroke: var(--player-highlight-1);
+    // stroke: var(--player-highlight-1);
   }
 
   &[player="2"].selected .hexagon,
   &[player="2"] .hexagon:hover {
-    stroke: var(--player-highlight-2);
+    // stroke: var(--player-highlight-2);
   }
 
   &.proposed {
@@ -65,14 +100,7 @@
     }
   }
 
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-
-  to {
-    opacity: 1;
+  &.disappear {
+    animation: disappear .7s forwards;
   }
 }

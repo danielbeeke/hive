@@ -1,3 +1,5 @@
+import { Helpers } from '../Helpers.js'
+
 export class Insect extends HTMLElement {
 
   connectedCallback() {
@@ -12,6 +14,13 @@ export class Insect extends HTMLElement {
       this.innerHTML = hexagon;
     } else {
       this.innerHTML = hexagon + `<img src="/images/${this.insectName}.png">`
+    }
+
+    if (localStorage.getItem('debug')) {
+      this.debug = document.createElement('span');
+      this.debug.classList.add('debug');
+      this.debug.innerText = `c${this.column}, r${this.row}`;
+      this.appendChild(this.debug);
     }
 
     this.classList.add(this.insectName, 'insect');
@@ -34,7 +43,7 @@ export class Insect extends HTMLElement {
         // First turn of player 2.
         else if (playerState === 'emptyBoard' && otherPlayerState !== 'emptyBoard') {
           this.select();
-          let firstPlacedPiece = document.querySelector(`.insect[player="${otherPlayer}"]`);
+          let firstPlacedPiece = document.querySelector(`hive-board .insect[player="${otherPlayer}"]`);
           firstPlacedPiece.highlightNeighbours((clickedProposed) => {
             this.state.transition(this.player, 'attachPiece', {
               piece: this,
@@ -75,7 +84,17 @@ export class Insect extends HTMLElement {
     let row = parseInt(this.getAttribute('r'));
     let column = parseInt(this.getAttribute('c'));
     let columnIsEven = column % 2;
-    this.setAttribute('style', `transform: translate(${column * 75 - 50}%, ${row * 100 - (columnIsEven ? 100 : 50) }%);`);
+
+    let x = column * 75 - 50;
+    let y = (row * 100) - 50;
+
+    if (column > 0) {
+      y = y + (column * 50);
+    } else if (column < 0) {
+      y = y - (Math.abs(column) * 50);
+    }
+
+    this.setAttribute('style', `transform: translate(${x}%, ${y}%);`);
   }
 
   get state() {
@@ -96,6 +115,7 @@ export class Insect extends HTMLElement {
 
   set row(value) {
     this.setAttribute('r', value);
+    if (this.debug) this.debug.innerText = `c${this.column}, r${this.row}`;
   }
 
   get row() {
@@ -104,12 +124,14 @@ export class Insect extends HTMLElement {
 
   set column(value) {
     this.setAttribute('c', value);
+    if (this.debug) this.debug.innerText = `c${this.column}, r${this.row}`;
   }
 
   get column() {
     return parseInt(this.getAttribute('c'));
   }
 
+  // TODO should do clean up
   select() {
     this.classList.add('selected');
     this.selected = true;
@@ -121,14 +143,7 @@ export class Insect extends HTMLElement {
   }
 
   highlightNeighbours(callback) {
-    let neighbours = [
-      { column: this.column, row: this.row - 1 },
-      { column: this.column - 1, row: this.row },
-      { column: this.column + 1, row: this.row },
-      { column: this.column, row: this.row + 1 },
-      { column: this.column - 1, row: this.row + 1 },
-      { column: this.column + 1, row: this.row + 1 },
-    ];
+    let neighbours = Helpers.getNeighbours(this.column, this.row);
 
     neighbours.forEach((neighbour) => {
       let pieceToAttach = document.createElement('hive-proposed');
@@ -143,24 +158,50 @@ export class Insect extends HTMLElement {
   }
 
   highlightAttachTiles(callback) {
-    let neighbours = [
-      { column: this.column, row: this.row - 1 },
-      { column: this.column - 1, row: this.row },
-      { column: this.column + 1, row: this.row },
-      { column: this.column, row: this.row + 1 },
-      { column: this.column - 1, row: this.row + 1 },
-      { column: this.column + 1, row: this.row + 1 },
-    ];
+    let ignoreTiles = new Map();
+    let borderTiles = new Map();
+    let attachTiles = new Map();
+    let otherPlayer = this.state.currentPlayer === 1 ? 2 : 1;
 
-    neighbours.forEach((neighbour) => {
+    Array.from([this.board.children[1]]).forEach((piece) => {
+      ignoreTiles.set(`column${piece.column}-row${piece.row}`, { column: piece.column, row: piece.row });
+      let neighbours = Helpers.getNeighbours(piece.column, piece.row);
+
+      neighbours.forEach((neighbour) => {
+        borderTiles.set(`column${neighbour.column}-row${neighbour.row}`, { column: neighbour.column, row: neighbour.row });
+      })
+    });
+
+    ignoreTiles.forEach((value, key) => {
+      borderTiles.delete(key);
+    });
+
+    borderTiles.forEach((borderTile, key) => {
       let pieceToAttach = document.createElement('hive-proposed');
-      pieceToAttach.column = neighbour.column;
-      pieceToAttach.row = neighbour.row;
+      pieceToAttach.column = borderTile.column;
+      pieceToAttach.row = borderTile.row;
       this.board.appendChild(pieceToAttach);
 
-      pieceToAttach.addEventListener('click', () => {
-        callback(pieceToAttach);
-      });
+
+      // let borderTileNeighbours = this.getNeighbours(borderTile.column, borderTile.row);
+
+      // let mayUsed = true;
+
+      // borderTileNeighbours.forEach((borderTileNeighbour) => {
+      //   let selector = `.insect[c="${borderTileNeighbour.column}"][r="${borderTileNeighbour.row}"][player="${otherPlayer}"]`;
+      //   let borderTileNeighbourPiece = document.querySelector(selector);
+      //   console.log(selector)
+      //   if (borderTileNeighbourPiece) {
+      //     mayUsed = false;
+      //   }
+      // })
+
+      // if (mayUsed) {
+      //   attachTiles.set(`column${borderTile.column}-row${borderTile.row}`, { column: borderTile.column, row: borderTile.row });
+      // }
     });
+
+    console.log(attachTiles)
   }
+
 }
