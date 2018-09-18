@@ -38,9 +38,17 @@
     top: 50%;
     left: 10px;
     font-size: 10px;
+    pointer-events: none;
     width: 20px;
     transform: translateY(-50%);
+  }
+
+  &[player="1"] .debug {
     color: black;
+  }
+
+  &[player="2"] .debug {
+    color: white;
   }
 
   &[player="1"] .hexagon {

@@ -55,8 +55,6 @@ export class State {
       this.currentPlayer = otherPlayer;
       this.serializeturn();
     }
-
-    console.log(this.states, this.currentPlayer);
   }
 
   attachPiece(state, data) {

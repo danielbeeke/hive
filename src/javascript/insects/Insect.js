@@ -5,6 +5,8 @@ export class Insect extends HTMLElement {
   connectedCallback() {
     this.insectName = this.constructor.name.toLowerCase();
     this.selected = false;
+    this.events = [];
+    this.isInRemoval = false;
 
     let hexagon = `<svg class="hexagon-svg" viewBox="0 0 300 260">
       <polygon class="hexagon" points="300,130 225,260 75,260 0,130 75,0 225,0"></polygon>
@@ -16,18 +18,13 @@ export class Insect extends HTMLElement {
       this.innerHTML = hexagon + `<img src="/images/${this.insectName}.png">`
     }
 
-    if (localStorage.getItem('debug')) {
-      this.debug = document.createElement('span');
-      this.debug.classList.add('debug');
-      this.debug.innerText = `c${this.column}, r${this.row}`;
-      this.appendChild(this.debug);
-    }
-
     this.classList.add(this.insectName, 'insect');
 
     if (this.insectName !== 'proposed') {
       this.addEventListener('click', () => {
         let otherPlayer = this.player === 1 ? 2 : 1;
+        if (this.state.currentPlayer === otherPlayer) return;
+
         let playerState = this.state.getPlayerState(this.player);
         let otherPlayerState = this.state.getPlayerState(otherPlayer);
 
@@ -64,6 +61,10 @@ export class Insect extends HTMLElement {
                 column: clickedProposed.column
               });
             });
+          } else {
+            this.board.setHighlights(this.getAllowedProposed(), (clickedProposed) => {
+              console.log(clickedProposed);
+            });
           }
         }
       });
@@ -83,7 +84,6 @@ export class Insect extends HTMLElement {
   applyPosition() {
     let row = parseInt(this.getAttribute('r'));
     let column = parseInt(this.getAttribute('c'));
-    let columnIsEven = column % 2;
 
     let x = column * 75 - 50;
     let y = (row * 100) - 50;
@@ -115,19 +115,19 @@ export class Insect extends HTMLElement {
 
   set row(value) {
     this.setAttribute('r', value);
-    if (this.debug) this.debug.innerText = `c${this.column}, r${this.row}`;
   }
 
   get row() {
+    if (this.getAttribute('r') === null) { return null; }
     return parseInt(this.getAttribute('r'));
   }
 
   set column(value) {
     this.setAttribute('c', value);
-    if (this.debug) this.debug.innerText = `c${this.column}, r${this.row}`;
   }
 
   get column() {
+    if (this.getAttribute('c') === null) { return null; }
     return parseInt(this.getAttribute('c'));
   }
 
@@ -151,57 +151,77 @@ export class Insect extends HTMLElement {
       pieceToAttach.row = neighbour.row;
       this.board.appendChild(pieceToAttach);
 
-      pieceToAttach.addEventListener('click', () => {
+      pieceToAttach.on('click', () => {
         callback(pieceToAttach);
       });
     });
   }
 
-  highlightAttachTiles(callback) {
+  getBorderTiles() {
     let ignoreTiles = new Map();
     let borderTiles = new Map();
-    let attachTiles = new Map();
-    let otherPlayer = this.state.currentPlayer === 1 ? 2 : 1;
 
-    Array.from([this.board.children[1]]).forEach((piece) => {
-      ignoreTiles.set(`column${piece.column}-row${piece.row}`, { column: piece.column, row: piece.row });
-      let neighbours = Helpers.getNeighbours(piece.column, piece.row);
+    Array.from(this.board.children).forEach((piece) => {
+      if (!piece.isInRemoval && piece.constructor.name !== 'Proposed') {
+        // Add all the existing pieces to the ignore list.
+        ignoreTiles.set(`column${piece.column}-row${piece.row}`, { column: piece.column, row: piece.row });
 
-      neighbours.forEach((neighbour) => {
-        borderTiles.set(`column${neighbour.column}-row${neighbour.row}`, { column: neighbour.column, row: neighbour.row });
-      })
+        // For each existing piece get the neighbours.
+        let neighbours = Helpers.getNeighbours(piece.column, piece.row);
+
+        neighbours.forEach((neighbour) => {
+          borderTiles.set(`column${neighbour.column}-row${neighbour.row}`, { column: neighbour.column, row: neighbour.row });
+        })
+      }
     });
 
     ignoreTiles.forEach((value, key) => {
       borderTiles.delete(key);
     });
 
-    borderTiles.forEach((borderTile, key) => {
-      let pieceToAttach = document.createElement('hive-proposed');
-      pieceToAttach.column = borderTile.column;
-      pieceToAttach.row = borderTile.row;
-      this.board.appendChild(pieceToAttach);
-
-
-      // let borderTileNeighbours = this.getNeighbours(borderTile.column, borderTile.row);
-
-      // let mayUsed = true;
-
-      // borderTileNeighbours.forEach((borderTileNeighbour) => {
-      //   let selector = `.insect[c="${borderTileNeighbour.column}"][r="${borderTileNeighbour.row}"][player="${otherPlayer}"]`;
-      //   let borderTileNeighbourPiece = document.querySelector(selector);
-      //   console.log(selector)
-      //   if (borderTileNeighbourPiece) {
-      //     mayUsed = false;
-      //   }
-      // })
-
-      // if (mayUsed) {
-      //   attachTiles.set(`column${borderTile.column}-row${borderTile.row}`, { column: borderTile.column, row: borderTile.row });
-      // }
-    });
-
-    console.log(attachTiles)
+    return borderTiles;
   }
 
+  highlightAttachTiles(callback) {
+    let borderTiles = this.getBorderTiles();
+    let attachTiles = new Map();
+    let otherPlayer = this.state.currentPlayer === 1 ? 2 : 1;
+
+    borderTiles.forEach((borderTile, key) => {
+      let borderTileNeighbours = Helpers.getNeighbours(borderTile.column, borderTile.row);
+
+      let mayUsed = true;
+
+      borderTileNeighbours.forEach((borderTileNeighbour) => {
+        let selector = `.insect[c="${borderTileNeighbour.column}"][r="${borderTileNeighbour.row}"][player="${otherPlayer}"]`;
+        let borderTileNeighbourPiece = document.querySelector(selector);
+
+        if (borderTileNeighbourPiece) {
+          mayUsed = false;
+        }
+      })
+
+      if (mayUsed) {
+        attachTiles.set(`column${borderTile.column}-row${borderTile.row}`, { column: borderTile.column, row: borderTile.row });
+      }
+    });
+
+    this.board.setHighlights(attachTiles, callback);
+  }
+
+  on(eventName, callback) {
+    this.events.push({ eventName, callback });
+    this.addEventListener(eventName, callback);
+  }
+
+  removeAllEvents() {
+    this.events.forEach((event) => {
+      this.removeEventListener(event.eventName, event.callback);
+    })
+  }
+
+  getAllowedProposed() {
+    // TODO.
+    return Helpers.getNeighbours(this.column, this.row);
+  }
 }

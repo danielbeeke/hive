@@ -1,7 +1,7 @@
 export class Helpers {
 
   static getNeighbours(column, row) {
-    return [
+    let neighbours = [
       { column: column - 1, row: row },
       { column: column + 1, row: row },
       { column: column, row: row - 1 },
@@ -9,6 +9,14 @@ export class Helpers {
       { column: column + 1, row: row - 1 },
       { column: column - 1, row: row + 1 },
     ];
+
+    let neighbourMap = new Map();
+
+    neighbours.forEach((neighbour) => {
+      neighbourMap.set(`column${neighbour.column}-row${neighbour.row}`, { column: neighbour.column, row: neighbour.row });
+    });
+
+    return neighbourMap;
   }
 
   static getBoard(depth = 3) {
