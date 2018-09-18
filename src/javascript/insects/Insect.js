@@ -221,7 +221,6 @@ export class Insect extends HTMLElement {
   }
 
   getAllowedProposed() {
-    // TODO.
-    return Helpers.getNeighbours(this.column, this.row);
+
   }
 }
