@@ -22,8 +22,6 @@ customElements.define('hive-board', class HiveBoard extends HTMLElement {
   }
 
   setHighlights(tiles, callback) {
-    console.log(tiles)
-
     tiles.forEach((tile) => {
       let selector = `hive-proposed.insect[c="${tile.column}"][r="${tile.row}"]`;
       let highlightTile = document.querySelector(selector);

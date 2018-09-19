@@ -63,7 +63,11 @@ export class Insect extends HTMLElement {
             });
           } else {
             this.board.setHighlights(this.getAllowedProposed(), (clickedProposed) => {
-              console.log(clickedProposed);
+              this.state.transition(this.player, 'attachPiece', {
+                piece: this,
+                row: clickedProposed.row,
+                column: clickedProposed.column
+              });
             });
           }
         }
@@ -221,6 +225,34 @@ export class Insect extends HTMLElement {
   }
 
   getAllowedProposed() {
+    let neighbours = Helpers.getNeighbours(this.column, this.row);
 
+    Array.from(this.board.children).forEach((piece) => {
+      if (!piece.isInRemoval && piece.constructor.name !== 'Proposed') {
+        // Add all the existing pieces to the ignore list.
+        neighbours.delete(`column${piece.column}-row${piece.row}`);
+      }
+    });
+
+    neighbours.forEach((neighbour) => {
+      let hasPieceAsNeighbourThatIsNotThis = false;
+
+      let neighbourNeighbours = Helpers.getNeighbours(neighbour.column, neighbour.row);
+
+      neighbourNeighbours.forEach((neighbourNeighbour) => {
+        let selector = `.insect[c="${neighbourNeighbour.column}"][r="${neighbourNeighbour.row}"]:not(hive-proposed)`;
+        let neighbourNeighbourPiece = document.querySelector(selector);
+
+        if (neighbourNeighbourPiece && neighbourNeighbourPiece !== this) {
+          hasPieceAsNeighbourThatIsNotThis = true;
+        }
+      });
+
+      if (!hasPieceAsNeighbourThatIsNotThis) {
+        neighbours.delete(`column${neighbour.column}-row${neighbour.row}`);
+      }
+    })
+
+    return neighbours;
   }
 }
