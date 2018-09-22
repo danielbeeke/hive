@@ -13,14 +13,14 @@ export class Helpers {
     let neighbourMap = new Map();
 
     neighbours.forEach((neighbour) => {
-      neighbourMap.set(`column${neighbour.column}-row${neighbour.row}`, { column: neighbour.column, row: neighbour.row });
+      neighbourMap.set(`column${neighbour.column}|row${neighbour.row}`, { column: neighbour.column, row: neighbour.row });
     });
 
     return neighbourMap;
   }
 
   static getBoard(depth = 3) {
-    let tiles = Helpers.getNeighbours(0, 0);
+    let tiles = [...Helpers.getNeighbours(0, 0).values()];
     let board = {}
 
     tiles.forEach((tile) => {
@@ -42,5 +42,28 @@ export class Helpers {
 
     return tiles;
   }
+
+  static breaksHive (removedTile, board) {
+    let group = new Set();
+
+    let appendToGroup = (piece) => {
+      console.log(piece)
+      // let neighbours = Helpers.getNeighbours(piece.column, piece.row);
+      
+      // neighbours.forEach((neighbour) => {
+      //   let selector = `.insect[c="${neighbour.column}"][r="${neighbour.row}"]:not(hive-proposed)`;
+      //   let neighbourPiece = document.querySelector(selector);
+
+      //   if (neighbourPiece && !neighbourPiece.isInRemoval && neighbour !== removedTile && !group.has(neighbourPiece)) {
+      //     appendToGroup(neighbourPiece);
+      //     group.add(neighbourPiece);
+      //   }
+      // });  
+    }
+
+
+    return false;
+  }
+
 
 }

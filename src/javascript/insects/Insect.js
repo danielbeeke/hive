@@ -8,8 +8,10 @@ export class Insect extends HTMLElement {
     this.events = [];
     this.isInRemoval = false;
 
+    let factor = 0.95;
     let hexagon = `<svg class="hexagon-svg" viewBox="0 0 300 260">
-      <polygon class="hexagon" points="300,130 225,260 75,260 0,130 75,0 225,0"></polygon>
+      <polygon class="hexagon-border" points="300,130 225,260 75,260 0,130 75,0 225,0"></polygon>
+      <polygon class="hexagon-inner" points="${300*factor},${130*factor} ${225*factor},${260*factor} ${75*factor},${260*factor} ${0*factor},${130*factor} ${75*factor},${0*factor} ${225*factor},${0*factor}" transform="translate(${300*(1-factor)/2} ${260*(1-factor)/2})"></polygon>
     </svg>`;
 
     if (['proposed'].includes(this.insectName)) {
@@ -40,8 +42,7 @@ export class Insect extends HTMLElement {
         // First turn of player 2.
         else if (playerState === 'emptyBoard' && otherPlayerState !== 'emptyBoard') {
           this.select();
-          let firstPlacedPiece = document.querySelector(`hive-board .insect[player="${otherPlayer}"]`);
-          firstPlacedPiece.highlightNeighbours((clickedProposed) => {
+          this.board.setHighlights(this.getBorderTiles(), (clickedProposed) => {
             this.state.transition(this.player, 'attachPiece', {
               piece: this,
               row: clickedProposed.row,
@@ -54,6 +55,7 @@ export class Insect extends HTMLElement {
         else if (['attachPiece', 'movePiece'].includes(playerState) && ['attachPiece', 'movePiece'].includes(otherPlayerState)) {
           // New piece to attach.
           if (this.parentNode !== this.board) {
+            this.select();
             this.highlightAttachTiles((clickedProposed) => {
               this.state.transition(this.player, 'attachPiece', {
                 piece: this,
@@ -61,7 +63,11 @@ export class Insect extends HTMLElement {
                 column: clickedProposed.column
               });
             });
-          } else {
+          }
+          
+          // Change a position of a piece.   
+          else {
+            this.select();
             this.board.setHighlights(this.getAllowedProposed(), (clickedProposed) => {
               this.state.transition(this.player, 'attachPiece', {
                 piece: this,
@@ -90,13 +96,7 @@ export class Insect extends HTMLElement {
     let column = parseInt(this.getAttribute('c'));
 
     let x = column * 75 - 50;
-    let y = (row * 100) - 50;
-
-    if (column > 0) {
-      y = y + (column * 50);
-    } else if (column < 0) {
-      y = y - (Math.abs(column) * 50);
-    }
+    let y = ((row * 100) - 50) + (column * 50);
 
     this.setAttribute('style', `transform: translate(${x}%, ${y}%);`);
   }
@@ -148,17 +148,7 @@ export class Insect extends HTMLElement {
 
   highlightNeighbours(callback) {
     let neighbours = Helpers.getNeighbours(this.column, this.row);
-
-    neighbours.forEach((neighbour) => {
-      let pieceToAttach = document.createElement('hive-proposed');
-      pieceToAttach.column = neighbour.column;
-      pieceToAttach.row = neighbour.row;
-      this.board.appendChild(pieceToAttach);
-
-      pieceToAttach.on('click', () => {
-        callback(pieceToAttach);
-      });
-    });
+    this.board.setHighlights(neighbours, callback);
   }
 
   getBorderTiles() {
@@ -168,13 +158,13 @@ export class Insect extends HTMLElement {
     Array.from(this.board.children).forEach((piece) => {
       if (!piece.isInRemoval && piece.constructor.name !== 'Proposed') {
         // Add all the existing pieces to the ignore list.
-        ignoreTiles.set(`column${piece.column}-row${piece.row}`, { column: piece.column, row: piece.row });
+        ignoreTiles.set(`column${piece.column}|row${piece.row}`, { column: piece.column, row: piece.row });
 
         // For each existing piece get the neighbours.
         let neighbours = Helpers.getNeighbours(piece.column, piece.row);
 
         neighbours.forEach((neighbour) => {
-          borderTiles.set(`column${neighbour.column}-row${neighbour.row}`, { column: neighbour.column, row: neighbour.row });
+          borderTiles.set(`column${neighbour.column}|row${neighbour.row}`, { column: neighbour.column, row: neighbour.row });
         })
       }
     });
@@ -206,7 +196,7 @@ export class Insect extends HTMLElement {
       })
 
       if (mayUsed) {
-        attachTiles.set(`column${borderTile.column}-row${borderTile.row}`, { column: borderTile.column, row: borderTile.row });
+        attachTiles.set(`column${borderTile.column}|row${borderTile.row}`, { column: borderTile.column, row: borderTile.row });
       }
     });
 
@@ -223,14 +213,17 @@ export class Insect extends HTMLElement {
       this.removeEventListener(event.eventName, event.callback);
     })
   }
-
+  
   getAllowedProposed() {
     let neighbours = Helpers.getNeighbours(this.column, this.row);
 
+    console.log(neighbours)
+
+    // TODO you can move a ladybug on top of others.
     Array.from(this.board.children).forEach((piece) => {
       if (!piece.isInRemoval && piece.constructor.name !== 'Proposed') {
         // Add all the existing pieces to the ignore list.
-        neighbours.delete(`column${piece.column}-row${piece.row}`);
+        neighbours.delete(`column${piece.column}|row${piece.row}`);
       }
     });
 
@@ -239,17 +232,8 @@ export class Insect extends HTMLElement {
 
       let neighbourNeighbours = Helpers.getNeighbours(neighbour.column, neighbour.row);
 
-      neighbourNeighbours.forEach((neighbourNeighbour) => {
-        let selector = `.insect[c="${neighbourNeighbour.column}"][r="${neighbourNeighbour.row}"]:not(hive-proposed)`;
-        let neighbourNeighbourPiece = document.querySelector(selector);
-
-        if (neighbourNeighbourPiece && neighbourNeighbourPiece !== this) {
-          hasPieceAsNeighbourThatIsNotThis = true;
-        }
-      });
-
-      if (!hasPieceAsNeighbourThatIsNotThis) {
-        neighbours.delete(`column${neighbour.column}-row${neighbour.row}`);
+      if (Helpers.breaksHive(neighbour, this.board)) {
+        neighbours.delete(`column${neighbour.column}|row${neighbour.row}`);
       }
     })
 

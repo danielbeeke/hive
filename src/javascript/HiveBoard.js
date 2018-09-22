@@ -41,7 +41,7 @@ customElements.define('hive-board', class HiveBoard extends HTMLElement {
     });
 
     this.querySelectorAll('hive-proposed').forEach((highlightTile) => {
-      if (tiles.has(`column${highlightTile.column}-row${highlightTile.row}`) === false) {
+      if (tiles.has(`column${highlightTile.column}|row${highlightTile.row}`) === false) {
         highlightTile.isInRemoval = true;
         highlightTile.oneTransitionEnd('opacity', () => {
           highlightTile.removeAllEvents();

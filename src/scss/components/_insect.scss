@@ -51,11 +51,15 @@
     color: white;
   }
 
-  &[player="1"] .hexagon {
+  .hexagon-inner {
+    cursor: pointer;
+  }
+
+  &[player="1"] .hexagon-inner {
     fill: var(--player-1);
   }
 
-  &[player="2"] .hexagon {
+  &[player="2"] .hexagon-inner {
     fill: var(--player-2);
   }
 
@@ -68,39 +72,44 @@
     top: 50%;
     transform: translate(-50%, -50%);
     object-fit: contain;
+    display: block;
   }
 
-  .hexagon {
+  .hexagon-border {
     cursor: pointer;
-    // stroke-width: 6;
-    // stroke: transparent;
-    transition: stroke var(--speed) var(--easing);
+    fill: transparent;
+    transition: fill .3s ease-in-out;
   }
 
-  &[player="1"].selected .hexagon,
-  &[player="1"] .hexagon:hover {
-    // stroke: var(--player-highlight-1);
-  }
+  &.selected .hexagon-border,
+  &:hover .hexagon-border {
+    [player="1"] & {
+      fill: var(--player-2);
+    }
 
-  &[player="2"].selected .hexagon,
-  &[player="2"] .hexagon:hover {
-    // stroke: var(--player-highlight-2);
+    [player="2"] & {
+      fill: var(--player-1);
+    }
   }
 
   &.proposed {
     opacity: 1;
     animation: fadeIn .3s;
-    transition: opacity .3s ease-in-out;
+    transition: opacity .3s ease-in-out, fill .3s ease-in-out;
 
-    .hexagon {
-      fill: rgba(white, .3);
-      stroke: rgba(white, .5);
-      stroke-width: 2;
+    .hexagon-border {
+      fill: transparent;
+    }
+
+    .hexagon-inner {
+      fill: rgb(172, 172, 172);
       transition: fill .3s ease-in-out;
     }
 
-    &:hover .hexagon {
-      fill: rgba(white, .8);
+    &:hover {
+      .hexagon-border {
+        fill: white;
+      }  
     }
 
     &.fade-out {

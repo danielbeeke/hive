@@ -1,5 +1,6 @@
 hive-player {
   width: 100%;
+  overflow-x: auto;
   display: block;
   flex: 0 0 170px;
   background-color: rgba(white, .1);
@@ -8,6 +9,7 @@ hive-player {
   display: flex;
 
   .insect {
-    margin: 0 10px;
+    margin: 5px 10px;
+    flex: 0 0 auto;
   }
 }
