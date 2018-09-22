@@ -2,16 +2,25 @@ import { Helpers } from '../Helpers.js'
 
 export class Insect extends HTMLElement {
 
+  /**
+   * CustomElement initialisation.
+   */
   connectedCallback() {
     this.insectName = this.constructor.name.toLowerCase();
     this.selected = false;
     this.events = [];
-    this.isInRemoval = false;
 
-    let factor = 0.95;
+    let f = 0.95;
     let hexagon = `<svg class="hexagon-svg" viewBox="0 0 300 260">
-      <polygon class="hexagon-border" points="300,130 225,260 75,260 0,130 75,0 225,0"></polygon>
-      <polygon class="hexagon-inner" points="${300*factor},${130*factor} ${225*factor},${260*factor} ${75*factor},${260*factor} ${0*factor},${130*factor} ${75*factor},${0*factor} ${225*factor},${0*factor}" transform="translate(${300*(1-factor)/2} ${260*(1-factor)/2})"></polygon>
+      <polygon 
+        class="hexagon-border" 
+        points="300,130 225,260 75,260 0,130 75,0 225,0">
+      </polygon>
+      <polygon 
+        class="hexagon-inner" 
+        points="${300*f},${130*f} ${225*f},${260*f} ${75*f},${260*f} ${0*f},${130*f} ${75*f},${0*f} ${225*f},${0*f}" 
+        transform="translate(${300*(1-f)/2} ${260*(1-f)/2})">
+      </polygon>
     </svg>`;
 
     if (['proposed'].includes(this.insectName)) {
@@ -23,26 +32,45 @@ export class Insect extends HTMLElement {
     this.classList.add(this.insectName, 'insect');
 
     if (this.insectName !== 'proposed') {
-      this.addEventListener('click', () => {
-        let otherPlayer = this.player === 1 ? 2 : 1;
-        if (this.state.currentPlayer === otherPlayer) return;
+      this.attachClick();
+    }
+  }
 
-        let playerState = this.state.getPlayerState(this.player);
-        let otherPlayerState = this.state.getPlayerState(otherPlayer);
+  attachClick () {
+    this.addEventListener('click', () => {
+      let otherPlayer = this.player === 1 ? 2 : 1;
+      if (this.state.currentPlayer === otherPlayer) return;
 
-        // Starting point.
-        if (playerState === 'emptyBoard' && otherPlayerState === 'emptyBoard') {
+      let playerState = this.state.getPlayerState(this.player);
+      let otherPlayerState = this.state.getPlayerState(otherPlayer);
+
+      // Starting point.
+      if (playerState === 'emptyBoard' && otherPlayerState === 'emptyBoard') {
+        this.state.transition(this.player, 'attachPiece', {
+          piece: this,
+          row: 0,
+          column: 0
+        });
+      }
+
+      // First turn of player 2.
+      else if (playerState === 'emptyBoard' && otherPlayerState !== 'emptyBoard') {
+        this.select();
+        this.board.setHighlights(this.board.getSwarmNeighbouringTiles(), (clickedProposed) => {
           this.state.transition(this.player, 'attachPiece', {
             piece: this,
-            row: 0,
-            column: 0
+            row: clickedProposed.row,
+            column: clickedProposed.column
           });
-        }
+        });
+      }
 
-        // First turn of player 2.
-        else if (playerState === 'emptyBoard' && otherPlayerState !== 'emptyBoard') {
+      // Other turns.
+      else if (['attachPiece', 'movePiece'].includes(playerState) && ['attachPiece', 'movePiece'].includes(otherPlayerState)) {
+        // New piece to attach.
+        if (this.parentNode !== this.board) {
           this.select();
-          this.board.setHighlights(this.getBorderTiles(), (clickedProposed) => {
+          this.board.highlightAttachTiles((clickedProposed) => {
             this.state.transition(this.player, 'attachPiece', {
               piece: this,
               row: clickedProposed.row,
@@ -50,35 +78,20 @@ export class Insect extends HTMLElement {
             });
           });
         }
-
-        // Other turns.
-        else if (['attachPiece', 'movePiece'].includes(playerState) && ['attachPiece', 'movePiece'].includes(otherPlayerState)) {
-          // New piece to attach.
-          if (this.parentNode !== this.board) {
-            this.select();
-            this.highlightAttachTiles((clickedProposed) => {
-              this.state.transition(this.player, 'attachPiece', {
-                piece: this,
-                row: clickedProposed.row,
-                column: clickedProposed.column
-              });
+        
+        // Change a position of a piece.   
+        else {
+          this.select();
+          this.board.setHighlights(this.getHighlights(), (clickedProposed) => {
+            this.state.transition(this.player, 'movePiece', {
+              piece: this,
+              row: clickedProposed.row,
+              column: clickedProposed.column
             });
-          }
-          
-          // Change a position of a piece.   
-          else {
-            this.select();
-            this.board.setHighlights(this.getAllowedProposed(), (clickedProposed) => {
-              this.state.transition(this.player, 'attachPiece', {
-                piece: this,
-                row: clickedProposed.row,
-                column: clickedProposed.column
-              });
-            });
-          }
+          });
         }
-      });
-    }
+      }
+    });
   }
 
   static get observedAttributes() {
@@ -135,7 +148,6 @@ export class Insect extends HTMLElement {
     return parseInt(this.getAttribute('c'));
   }
 
-  // TODO should do clean up
   select() {
     this.classList.add('selected');
     this.selected = true;
@@ -145,64 +157,7 @@ export class Insect extends HTMLElement {
     this.classList.remove('selected');
     this.selected = false;
   }
-
-  highlightNeighbours(callback) {
-    let neighbours = Helpers.getNeighbours(this.column, this.row);
-    this.board.setHighlights(neighbours, callback);
-  }
-
-  getBorderTiles() {
-    let ignoreTiles = new Map();
-    let borderTiles = new Map();
-
-    Array.from(this.board.children).forEach((piece) => {
-      if (!piece.isInRemoval && piece.constructor.name !== 'Proposed') {
-        // Add all the existing pieces to the ignore list.
-        ignoreTiles.set(`column${piece.column}|row${piece.row}`, { column: piece.column, row: piece.row });
-
-        // For each existing piece get the neighbours.
-        let neighbours = Helpers.getNeighbours(piece.column, piece.row);
-
-        neighbours.forEach((neighbour) => {
-          borderTiles.set(`column${neighbour.column}|row${neighbour.row}`, { column: neighbour.column, row: neighbour.row });
-        })
-      }
-    });
-
-    ignoreTiles.forEach((value, key) => {
-      borderTiles.delete(key);
-    });
-
-    return borderTiles;
-  }
-
-  highlightAttachTiles(callback) {
-    let borderTiles = this.getBorderTiles();
-    let attachTiles = new Map();
-    let otherPlayer = this.state.currentPlayer === 1 ? 2 : 1;
-
-    borderTiles.forEach((borderTile, key) => {
-      let borderTileNeighbours = Helpers.getNeighbours(borderTile.column, borderTile.row);
-
-      let mayUsed = true;
-
-      borderTileNeighbours.forEach((borderTileNeighbour) => {
-        let selector = `.insect[c="${borderTileNeighbour.column}"][r="${borderTileNeighbour.row}"][player="${otherPlayer}"]`;
-        let borderTileNeighbourPiece = document.querySelector(selector);
-
-        if (borderTileNeighbourPiece) {
-          mayUsed = false;
-        }
-      })
-
-      if (mayUsed) {
-        attachTiles.set(`column${borderTile.column}|row${borderTile.row}`, { column: borderTile.column, row: borderTile.row });
-      }
-    });
-
-    this.board.setHighlights(attachTiles, callback);
-  }
-
+  
   on(eventName, callback) {
     this.events.push({ eventName, callback });
     this.addEventListener(eventName, callback);
@@ -213,30 +168,21 @@ export class Insect extends HTMLElement {
       this.removeEventListener(event.eventName, event.callback);
     })
   }
-  
-  getAllowedProposed() {
-    let neighbours = Helpers.getNeighbours(this.column, this.row);
 
-    console.log(neighbours)
-
-    // TODO you can move a ladybug on top of others.
-    Array.from(this.board.children).forEach((piece) => {
-      if (!piece.isInRemoval && piece.constructor.name !== 'Proposed') {
-        // Add all the existing pieces to the ignore list.
-        neighbours.delete(`column${piece.column}|row${piece.row}`);
-      }
-    });
-
-    neighbours.forEach((neighbour) => {
-      let hasPieceAsNeighbourThatIsNotThis = false;
-
-      let neighbourNeighbours = Helpers.getNeighbours(neighbour.column, neighbour.row);
-
-      if (Helpers.breaksHive(neighbour, this.board)) {
-        neighbours.delete(`column${neighbour.column}|row${neighbour.row}`);
-      }
-    })
-
-    return neighbours;
+  getHighlights() {
+    return new Map();
   }
+
+  // Can physically move to the coordinate
+  canPhysicallyFitThrough (coordinate) {
+    console.log('hii')
+    return true;
+  }
+
+  // During the movement of the piece, the swarm must not be separated
+  // Therefor, we don't need to know any arguments
+  maintainsSwarm () {
+
+  }
+
 }

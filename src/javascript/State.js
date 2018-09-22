@@ -2,27 +2,44 @@ export class State {
   constructor(board) {
     this.board = board;
 
-    this.states = {
-      player1: 'emptyBoard',
-      player2: 'emptyBoard'
-    };
-
-    this.currentPlayer = false;
-
     this.transitions = {
       'emptyBoard': ['attachPiece'],
       'attachPiece': ['attachPiece', 'movePiece'],
     };
 
     this.turns = [];
+
+    document.addEventListener('keydown', (event) => {
+      const shortcuts = {
+        79: 'restoreSnapshot',
+        83: 'saveSnapshot'
+      }
+
+      if (event.which in shortcuts && event.ctrlKey) {
+        event.preventDefault();
+        this[shortcuts[event.which]]();
+      }
+    });
+  }
+
+  get currentPlayer () {
+    let currentPlayer = this.board.getAttribute('current-player');
+    return parseInt(currentPlayer);
+  }
+
+  set currentPlayer (player) {
+    this.board.setAttribute('current-player', player);
   }
 
   getPlayerState(playerId) {
-    return this.states['player' + playerId];
+    let player = document.querySelector(`hive-player[player="${playerId}"]`);
+    let state = player.getAttribute('state');
+    return state;
   }
 
-  setPlayerState(playerId, state) {
-    this.states['player' + playerId] = state;
+  setPlayerState(playerId, action) {
+    let player = document.querySelector(`hive-player[player="${playerId}"]`);
+    player.setAttribute('state', action);
   }
 
   /**
@@ -32,32 +49,36 @@ export class State {
    * @param {*} state
    * @param {*} data
    */
-  transition(playerId, state, data) {
+  transition(playerId, action, data) {
     if (!this.currentPlayer) this.currentPlayer = playerId;
 
     let currentState = this.getPlayerState(playerId);
     let otherPlayer = playerId === 1 ? 2 : 1;
 
-    if (!this.transitions[currentState].includes(state)) {
+    if (!this.transitions[currentState].includes(action)) {
       console.warn('The transition is not allowed');
       return;
     }
 
-    if (typeof this[state] === 'function') {
-      this.turns.push({
-        player: playerId,
-        state: state,
-        data: data
-      });
+    if (typeof this[action] === 'function') {
+      // this.turns.push({
+      //   player: playerId,
+      //   action: action,
+      //   data: data
+      // });
 
-      this[state](state, data);
-      this.setPlayerState(playerId, state);
+      this[action](data);
+      this.setPlayerState(playerId, action);
       this.currentPlayer = otherPlayer;
-      this.serializeturn();
+      // this.serializeturn();
     }
   }
 
-  attachPiece(state, data) {
+  movePiece (data) {
+    this.attachPiece(data);
+  }
+
+  attachPiece(data) {
     let piece = data.piece;
 
     let clonedPiece = piece.cloneNode(true);
@@ -89,6 +110,17 @@ export class State {
     clonedPiece.style.transform = `translate(${clientRect.left}px, ${clientRect.top}px)`;
 
     piece.remove();
+  }
+
+  saveSnapshot () {
+    this.board.cleanUpHighlights();
+    let app = document.querySelector('.app');
+    localStorage.setItem('snapshot', app.innerHTML);
+  }
+
+  restoreSnapshot () {
+    let app = document.querySelector('.app');
+    app.innerHTML = localStorage.getItem('snapshot');
   }
 
   serializeturn() {

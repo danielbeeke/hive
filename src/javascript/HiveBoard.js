@@ -8,6 +8,9 @@ customElements.define('hive-board', class HiveBoard extends HTMLElement {
     this.state = new State(this);
   }
 
+  /**
+   * Cleans up all highlights on the board.
+   */
   cleanUpHighlights() {
     let highlights = Array.from(this.children).filter(child => child.constructor.name === 'Proposed');
     highlights.forEach(highlight => {
@@ -21,6 +24,11 @@ customElements.define('hive-board', class HiveBoard extends HTMLElement {
     });
   }
 
+  /**
+   * Gives a set of tile coordinates, it attaches the right callback and ensure the highlighted tiles are set. It fades out already and unneeded set highlights.
+   * @param {*} tiles 
+   * @param {*} callback 
+   */
   setHighlights(tiles, callback) {
     tiles.forEach((tile) => {
       let selector = `hive-proposed.insect[c="${tile.column}"][r="${tile.row}"]`;
@@ -53,6 +61,68 @@ customElements.define('hive-board', class HiveBoard extends HTMLElement {
     });
   }
 
+  /**
+   * Returns all the highlights around the swarm / hive.
+   */
+  getSwarmNeighbouringTiles() {
+    let ignoreTiles = new Map();
+    let borderTiles = new Map();
+
+    Array.from(this.children).forEach((piece) => {
+      if (!piece.isInRemoval && piece.constructor.name !== 'Proposed') {
+        // Add all the existing pieces to the ignore list.
+        ignoreTiles.set(`column${piece.column}|row${piece.row}`, { column: piece.column, row: piece.row });
+
+        // For each existing piece get the neighbours.
+        let neighbours = Helpers.getNeighbours(piece.column, piece.row);
+
+        neighbours.forEach((neighbour) => {
+          borderTiles.set(`column${neighbour.column}|row${neighbour.row}`, { column: neighbour.column, row: neighbour.row });
+        })
+      }
+    });
+
+    ignoreTiles.forEach((value, key) => {
+      borderTiles.delete(key);
+    });
+
+    return borderTiles;
+  }
+
+  /**
+   * Highlights all attach tiles for a new piece to bring into the game.
+   * @param {*} callback 
+   */
+  highlightAttachTiles(callback) {
+    let borderTiles = this.getSwarmNeighbouringTiles();
+    let attachTiles = new Map();
+    let otherPlayer = this.state.currentPlayer === 1 ? 2 : 1;
+
+    borderTiles.forEach((borderTile, key) => {
+      let borderTileNeighbours = Helpers.getNeighbours(borderTile.column, borderTile.row);
+
+      let mayUsed = true;
+
+      borderTileNeighbours.forEach((borderTileNeighbour) => {
+        let selector = `.insect[c="${borderTileNeighbour.column}"][r="${borderTileNeighbour.row}"][player="${otherPlayer}"]`;
+        let borderTileNeighbourPiece = document.querySelector(selector);
+
+        if (borderTileNeighbourPiece) {
+          mayUsed = false;
+        }
+      })
+
+      if (mayUsed) {
+        attachTiles.set(`column${borderTile.column}|row${borderTile.row}`, { column: borderTile.column, row: borderTile.row });
+      }
+    });
+
+    this.setHighlights(attachTiles, callback);
+  }
+
+  /**
+   * Create a circle of tiles for debugging purposes.
+   */
   debugPlacement() {
     let tiles = Helpers.getBoard(2);
 
