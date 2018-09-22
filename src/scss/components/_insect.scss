@@ -81,20 +81,19 @@
     transition: fill .3s ease-in-out;
   }
 
-  &.selected .hexagon-border,
-  &:hover .hexagon-border {
-    [player="1"] & {
+  &[player="1"].selected .hexagon-border,
+  &[player="1"]:hover .hexagon-border {
       fill: var(--player-2);
-    }
+  }
 
-    [player="2"] & {
+  &[player="2"].selected .hexagon-border,
+  &[player="2"]:hover .hexagon-border {
       fill: var(--player-1);
-    }
   }
 
   &.proposed {
     opacity: 1;
-    animation: fadeIn .3s;
+    animation: fadeIn .5s;
     transition: opacity .3s ease-in-out, fill .3s ease-in-out;
 
     .hexagon-border {

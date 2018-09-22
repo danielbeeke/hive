@@ -1,3 +1,7 @@
+$speed: 0.5s;
+$delay-from-active-to-inactive: 1s;
+$delay-from-inactive-to-active: 1s;
+
 hive-player {
   width: 100%;
   overflow-x: auto;
@@ -7,7 +11,7 @@ hive-player {
   justify-content: center;
   align-items: center;
   display: flex;
-  transition: background-color 0.3s ease-in-out;
+  transition: background-color $speed cubic-bezier(.3,.14,.36,1) $delay-from-active-to-inactive;
 
   &[player="1"] {
     order: 1;
@@ -20,20 +24,27 @@ hive-player {
   .insect {
     margin: 5px 10px;
     flex: 0 0 auto;
-    transition: opacity 0.3s ease-in-out;
+    transition-property: opacity, filter;
+    transition-duration: $speed;
+    transition-timing-function: cubic-bezier(.3,.14,.36,1);
+    transition-delay: $delay-from-inactive-to-active;
+    filter: grayscale(0);
   }
 
   hive-board[current-player="1"] ~ &[player="1"],
   hive-board[current-player="2"] ~ &[player="2"] {
     background-color: rgba(white, .3);
+    transition-delay: $delay-from-inactive-to-active;
   }
 
   hive-board:not([current-player="1"]) ~ &[player="1"],
   hive-board:not([current-player="2"]) ~ &[player="2"] {
     .insect {
-      opacity: 0.5;    
+      opacity: 0.5;
+      filter: grayscale(90%);
       pointer-events: none;
       touch-action: none;
+      transition-delay: $delay-from-active-to-inactive;
     }
   }
 }
