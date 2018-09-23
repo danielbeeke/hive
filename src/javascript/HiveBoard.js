@@ -111,7 +111,7 @@ customElements.define('hive-board', class HiveBoard extends HTMLElement {
         if (borderTileNeighbourPiece) {
           mayUsed = false;
         }
-      })
+      });
 
       if (mayUsed) {
         attachTiles.set(`column${borderTile.column}|row${borderTile.row}`, { column: borderTile.column, row: borderTile.row });
@@ -119,6 +119,52 @@ customElements.define('hive-board', class HiveBoard extends HTMLElement {
     });
 
     this.setHighlights(attachTiles, callback);
+  }
+
+  /**
+   * Moves and animates a piece to a coordinate.
+   * @param data
+   */
+  movePiece (data) {
+    this.attachPiece(data);
+  }
+
+  /**
+   * Attaches and animates a piece to a coordinate.
+   * @param data
+   */
+  attachPiece(data) {
+    let piece = data.piece;
+
+    let clonedPiece = piece.cloneNode(true);
+    let clonedPieceForPlayer = piece.cloneNode(true);
+    clonedPiece.style.position = 'fixed';
+    let clientRect = piece.getBoundingClientRect();
+    clonedPiece.style.transform = `translate(${clientRect.left}px, ${clientRect.top}px)`;
+    document.body.appendChild(clonedPiece);
+
+    piece.parentNode.insertBefore(clonedPieceForPlayer, piece.nextSibling);
+    this.board.appendChild(piece);
+
+    clonedPieceForPlayer.oneAnimationEnd('disappear', () => {
+      clonedPieceForPlayer.remove();
+    });
+    clonedPieceForPlayer.classList.add('disappear');
+
+    piece.row = data.row;
+    piece.column = data.column;
+
+    piece.deselect();
+    this.board.cleanUpHighlights();
+
+    clientRect = piece.getBoundingClientRect();
+    clonedPiece.oneTransitionEnd('transform', () => {
+      this.board.appendChild(piece);
+      clonedPiece.remove();
+    });
+    clonedPiece.style.transform = `translate(${clientRect.left}px, ${clientRect.top}px)`;
+
+    piece.remove();
   }
 
   /**
