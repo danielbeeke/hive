@@ -24,7 +24,7 @@ export class Insect extends HTMLElement {
       </polygon>
     </svg>`;
 
-    if (['proposed'].includes(this.insectName)) {
+    if (['highlight'].includes(this.insectName)) {
       this.innerHTML = hexagon;
     } else {
       this.innerHTML = hexagon + `<img src="/images/${this.insectName}.png">`
@@ -32,7 +32,7 @@ export class Insect extends HTMLElement {
 
     this.classList.add(this.insectName, 'insect');
 
-    if (this.insectName !== 'proposed') {
+    if (this.insectName !== 'highlight') {
       this.attachClick();
     }
   }
@@ -60,11 +60,11 @@ export class Insect extends HTMLElement {
       // First turn of player 2.
       else if (playerState === 'emptyBoard' && otherPlayerState !== 'emptyBoard') {
         this.select();
-        this.board.setHighlights(this.board.getSwarmNeighbouringTiles(), (clickedProposed) => {
+        this.board.setHighlights(this.board.getSwarmNeighbouringTiles(), (clickedHighlight) => {
           this.state.transition(this.player, 'attachPiece', {
             piece: this,
-            row: clickedProposed.row,
-            column: clickedProposed.column
+            row: clickedHighlight.row,
+            column: clickedHighlight.column
           });
         });
       }
@@ -74,11 +74,11 @@ export class Insect extends HTMLElement {
         // New piece to attach.
         if (this.parentNode !== this.board) {
           this.select();
-          this.board.highlightAttachTiles((clickedProposed) => {
+          this.board.highlightAttachTiles((clickedHighlight) => {
             this.state.transition(this.player, 'attachPiece', {
               piece: this,
-              row: clickedProposed.row,
-              column: clickedProposed.column
+              row: clickedHighlight.row,
+              column: clickedHighlight.column
             });
           });
         }
@@ -86,11 +86,11 @@ export class Insect extends HTMLElement {
         // Change a position of a piece.   
         else {
           this.select();
-          this.board.setHighlights(this.getHighlights(), (clickedProposed) => {
+          this.board.setHighlights(this.getHighlights(), (clickedHighlight) => {
             this.state.transition(this.player, 'movePiece', {
               piece: this,
-              row: clickedProposed.row,
-              column: clickedProposed.column
+              row: clickedHighlight.row,
+              column: clickedHighlight.column
             });
           });
         }
@@ -177,12 +177,31 @@ export class Insect extends HTMLElement {
   }
 
   /**
-   * This method needs to be implemented in each inheriting class.
+   * This method returns all the possible tiles, the swarm border and the pieces them self.
+   * Then we iterate over this.movingRules, that array contains all the moving rules for the current piece.
+   *
    * @returns {Map}
    */
   getHighlights() {
-    return new Map();
+    let coordinates = this.board.getSwarmNeighbouringTiles();
+
+    Array.from(this.board.children).forEach((piece) => {
+      if (piece.constructor.name !== 'Highlight' && piece !== this) {
+        coordinates.set(`column${piece.column}|row${piece.row}`, { column: piece.column, row: piece.row });
+      }
+    });
+
+    coordinates.forEach((coordinate) => {
+      const moveIsAllowed = (movingRule) => movingRule(coordinate);
+
+      if (!this.movingRules.every(moveIsAllowed)) {
+        coordinates.delete(`column${coordinate.column}|row${coordinate.row}`);
+      }
+    });
+
+    return coordinates;
   }
+
 
   /**
    * Game rule:

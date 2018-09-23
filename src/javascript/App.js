@@ -1,6 +1,6 @@
 import './oneTransitionEnd.js';
 
-import './insects/Proposed.js';
+import './insects/Highlight.js';
 import './insects/Ant.js';
 import './insects/Beetle.js';
 import './insects/Grasshopper.js';

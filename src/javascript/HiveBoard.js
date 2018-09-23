@@ -12,7 +12,7 @@ customElements.define('hive-board', class HiveBoard extends HTMLElement {
    * Cleans up all highlights on the board.
    */
   cleanUpHighlights() {
-    let highlights = Array.from(this.children).filter(child => child.constructor.name === 'Proposed');
+    let highlights = Array.from(this.children).filter(child => child.constructor.name === 'Highlight');
     highlights.forEach(highlight => {
       highlight.isInRemoval = true;
       highlight.oneTransitionEnd('opacity', () => {
@@ -33,13 +33,13 @@ customElements.define('hive-board', class HiveBoard extends HTMLElement {
    */
   setHighlights(tiles, callback) {
     tiles.forEach((tile) => {
-      let selector = `hive-proposed.insect[c="${tile.column}"][r="${tile.row}"]`;
+      let selector = `hive-highlight.insect[c="${tile.column}"][r="${tile.row}"]`;
       let highlightTile = document.querySelector(selector);
 
       if (highlightTile) {
         highlightTile.removeAllEvents();
       } else {
-        highlightTile = document.createElement('hive-proposed');
+        highlightTile = document.createElement('hive-highlight');
         highlightTile.column = tile.column;
         highlightTile.row = tile.row;
         this.appendChild(highlightTile);
@@ -50,7 +50,7 @@ customElements.define('hive-board', class HiveBoard extends HTMLElement {
       });
     });
 
-    this.querySelectorAll('hive-proposed').forEach((highlightTile) => {
+    this.querySelectorAll('hive-highlight').forEach((highlightTile) => {
       if (tiles.has(`column${highlightTile.column}|row${highlightTile.row}`) === false) {
         highlightTile.isInRemoval = true;
         
@@ -72,7 +72,7 @@ customElements.define('hive-board', class HiveBoard extends HTMLElement {
     let borderTiles = new Map();
 
     Array.from(this.children).forEach((piece) => {
-      if (!piece.isInRemoval && piece.constructor.name !== 'Proposed') {
+      if (!piece.isInRemoval && piece.constructor.name !== 'Highlight') {
         // Add all the existing pieces to the ignore list.
         ignoreTiles.set(`column${piece.column}|row${piece.row}`, { column: piece.column, row: piece.row });
 
@@ -176,7 +176,7 @@ customElements.define('hive-board', class HiveBoard extends HTMLElement {
     let tiles = Helpers.getBoard(2);
 
     tiles.forEach((tile) => {
-      let pieceToAttach = document.createElement('hive-proposed');
+      let pieceToAttach = document.createElement('hive-highlight');
       pieceToAttach.column = tile.column;
       pieceToAttach.row = tile.row;
       this.appendChild(pieceToAttach);
