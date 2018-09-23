@@ -1,16 +1,14 @@
-$speed: 0.5s;
 $delay-from-active-to-inactive: 1s;
 $delay-from-inactive-to-active: 1s;
 
 hive-player {
   width: 100%;
-  overflow-x: auto;
-  display: block;
+  overflow-x: scroll;
   flex: 0 0 170px;
   background-color: rgba(white, .1);
-  justify-content: center;
   align-items: center;
   display: flex;
+  flex-wrap: nowrap;
   transition: background-color $speed cubic-bezier(.3,.14,.36,1) $delay-from-active-to-inactive;
 
   &[player="1"] {
@@ -48,3 +46,4 @@ hive-player {
     }
   }
 }
+

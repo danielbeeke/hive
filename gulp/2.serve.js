@@ -20,7 +20,7 @@ gulp.task('browsersync', () => {
   });
 
   gulp.watch([global.paths.html, global.paths.js]).on('change', reload);
-  gulp.watch(global.paths.scss, gulp.series('css'));
+  gulp.watch(global.paths.scss, { usePolling: true }, gulp.series('css'));
 });
 
 gulp.task('serve', gulp.series('css', 'browsersync'));

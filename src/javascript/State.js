@@ -93,7 +93,7 @@ export class State {
 
     clonedPieceForPlayer.oneAnimationEnd('disappear', () => {
       clonedPieceForPlayer.remove();
-    })
+    });
     clonedPieceForPlayer.classList.add('disappear');
 
     piece.row = data.row;
