@@ -21,7 +21,7 @@ function whichTransitionEvent() {
 HTMLElement.prototype.oneTransitionEnd = function(property, callback) {
   if (transitionEndType) {
     let innerCallback = (event) => {
-      if (event.propertyName.substr(-(property.length)) === property && event.target == this) {
+      if (event.propertyName.substr(-(property.length)) === property && event.target === this) {
         callback();
         this.removeEventListener(transitionEndType, innerCallback);
       }
@@ -58,7 +58,7 @@ function whichAnimationEvent() {
 HTMLElement.prototype.oneAnimationEnd = function(animationName, callback) {
   if (animationEndType) {
     let innerCallback = (event) => {
-      if (event.animationName === animationName && event.target == this) {
+      if (event.animationName === animationName && event.target === this) {
         callback();
         this.removeEventListener(animationEndType, innerCallback);
       }

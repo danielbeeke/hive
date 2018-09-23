@@ -25,9 +25,11 @@ customElements.define('hive-board', class HiveBoard extends HTMLElement {
   }
 
   /**
-   * Gives a set of tile coordinates, it attaches the right callback and ensure the highlighted tiles are set. It fades out already and unneeded set highlights.
-   * @param {*} tiles 
-   * @param {*} callback 
+   * Gives a set of tile coordinates, it attaches the right callback and ensure the highlighted tiles are set.
+   * It fades out already and unneeded set highlights.
+   *
+   * @param {Map} tiles A Map of tile coordinates
+   * @param {Function} callback
    */
   setHighlights(tiles, callback) {
     tiles.forEach((tile) => {
@@ -92,7 +94,7 @@ customElements.define('hive-board', class HiveBoard extends HTMLElement {
 
   /**
    * Highlights all attach tiles for a new piece to bring into the game.
-   * @param {*} callback 
+   * @param {Function} callback Will be called when a tile is clicked.
    */
   highlightAttachTiles(callback) {
     let borderTiles = this.getSwarmNeighbouringTiles();
@@ -144,7 +146,7 @@ customElements.define('hive-board', class HiveBoard extends HTMLElement {
     document.body.appendChild(clonedPiece);
 
     piece.parentNode.insertBefore(clonedPieceForPlayer, piece.nextSibling);
-    this.board.appendChild(piece);
+    this.appendChild(piece);
 
     clonedPieceForPlayer.oneAnimationEnd('disappear', () => {
       clonedPieceForPlayer.remove();
@@ -155,11 +157,11 @@ customElements.define('hive-board', class HiveBoard extends HTMLElement {
     piece.column = data.column;
 
     piece.deselect();
-    this.board.cleanUpHighlights();
+    this.cleanUpHighlights();
 
     clientRect = piece.getBoundingClientRect();
     clonedPiece.oneTransitionEnd('transform', () => {
-      this.board.appendChild(piece);
+      this.appendChild(piece);
       clonedPiece.remove();
     });
     clonedPiece.style.transform = `translate(${clientRect.left}px, ${clientRect.top}px)`;

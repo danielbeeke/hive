@@ -1,5 +1,8 @@
 customElements.define('hive-player', class HivePlayer extends HTMLElement {
 
+  /**
+   * If this HTML is loaded from a clean state we add all the pieces.
+   */
   connectedCallback () {
     if (!this.children.length) {
       let player = this.getAttribute('player');

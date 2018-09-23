@@ -1,9 +1,10 @@
-import { Helpers } from '../Helpers.js'
+import { Helpers } from './Helpers.js'
 
 export class Insect extends HTMLElement {
 
   /**
    * CustomElement initialisation.
+   * Creates the HTML and SVG.
    */
   connectedCallback() {
     this.insectName = this.constructor.name.toLowerCase();
@@ -36,6 +37,9 @@ export class Insect extends HTMLElement {
     }
   }
 
+  /**
+   * Attaches a click event that handles the player turns.
+   */
   attachClick () {
     this.addEventListener('click', () => {
       let otherPlayer = this.player === 1 ? 2 : 1;
@@ -104,6 +108,9 @@ export class Insect extends HTMLElement {
     }
   }
 
+  /**
+   * This is the only code needed for positioning the hexagon grid.
+   */
   applyPosition() {
     let row = parseInt(this.getAttribute('r'));
     let column = parseInt(this.getAttribute('c'));
@@ -169,18 +176,34 @@ export class Insect extends HTMLElement {
     })
   }
 
+  /**
+   * This method needs to be implemented in each inheriting class.
+   * @returns {Map}
+   */
   getHighlights() {
     return new Map();
   }
 
-  // Can physically move to the coordinate
+  /**
+   * Game rule:
+   * Can physically move to the coordinate
+   *
+   * @param coordinate
+   * @returns {boolean}
+   */
   canPhysicallyFitThrough (coordinate) {
     console.log('hii')
     return true;
   }
 
-  // During the movement of the piece, the swarm must not be separated
-  // Therefor, we don't need to know any arguments
+  /**
+   * Game rule:
+   * During the movement of the piece, the swarm must not be separated,
+   * Therefor, we don't need to know any arguments
+   *
+   * @param coordinate
+   * @returns {boolean}
+   */
   maintainsSwarm () {
 
   }

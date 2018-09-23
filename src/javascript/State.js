@@ -8,8 +8,6 @@ export class State {
       'movePiece': ['attachPiece', 'movePiece'],
     };
 
-    this.turns = [];
-
     document.addEventListener('keydown', (event) => {
       const shortcuts = {
         79: 'restoreSnapshot',
@@ -43,11 +41,7 @@ export class State {
   }
 
   /**
-   * Plays a turn.
-   *
-   * @param {*} playerId
-   * @param {*} state
-   * @param {*} data
+   * Plays a turn, checks if the transition is allowed.
    */
   transition(playerId, action, data) {
     if (!this.currentPlayer) this.currentPlayer = playerId;
@@ -67,12 +61,18 @@ export class State {
     }
   }
 
+  /**
+   * Saves the complete state from the DOM because every state thing is an attribute.
+   */
   saveSnapshot () {
     this.board.cleanUpHighlights();
     let app = document.querySelector('.app');
     localStorage.setItem('snapshot', app.innerHTML);
   }
 
+  /**
+   * Restores the complete state from the snapshot because every state thing is an attribute.
+   */
   restoreSnapshot () {
     let app = document.querySelector('.app');
     app.innerHTML = localStorage.getItem('snapshot');
