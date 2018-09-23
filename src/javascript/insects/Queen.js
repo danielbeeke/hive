@@ -6,8 +6,10 @@ customElements.define('hive-queen', class Queen extends Insect {
     super();
 
     this.movingRules = [
-      this.canPhysicallyFitThrough,
+      // this.canPhysicallyFitThrough,
       // this.maintainsSwarm,
+      this.isEmptySpot,
+      this.isNeighbour
     ];
   }
 

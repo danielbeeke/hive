@@ -192,7 +192,8 @@ export class Insect extends HTMLElement {
     });
 
     coordinates.forEach((coordinate) => {
-      const moveIsAllowed = (movingRule) => movingRule(coordinate);
+      const neighbouringCoordinates = Helpers.getNeighbours(this.column, this.row);
+      const moveIsAllowed = (movingRule) => movingRule(coordinate, neighbouringCoordinates);
 
       if (!this.movingRules.every(moveIsAllowed)) {
         coordinates.delete(`column${coordinate.column}|row${coordinate.row}`);
@@ -208,10 +209,12 @@ export class Insect extends HTMLElement {
    * Can physically move to the coordinate
    *
    * @param coordinate
+   * @param neighbouringCoordinates
    * @returns {boolean}
    */
-  canPhysicallyFitThrough (coordinate) {
-    console.log('hii')
+  canPhysicallyFitThrough (coordinate, neighbouringCoordinates) {
+    // For each step we need to check if the surrounding tiles are enclosing the path.
+    console.log(coordinate)
     return true;
   }
 
@@ -220,11 +223,32 @@ export class Insect extends HTMLElement {
    * During the movement of the piece, the swarm must not be separated,
    * Therefor, we don't need to know any arguments
    *
-   * @param coordinate
    * @returns {boolean}
    */
   maintainsSwarm () {
-
+    return true;
   }
 
+
+  /**
+   * Game rule:
+   * Some pieces may not move on top of others.
+   * @returns {boolean}
+   */
+  isEmptySpot (coordinate) {
+    let selector = `.insect[c="${coordinate.column}"][r="${coordinate.row}"]`;
+    let piece = document.querySelector(selector);
+    return !piece;
+  }
+
+  /**
+   * A couple of piece may step one step at a time.
+   * @param coordinate
+   * @param neighbouringCoordinates
+   * @returns {boolean}
+   */
+  isNeighbour (coordinate, neighbouringCoordinates) {
+    console.log(neighbouringCoordinates, `column${coordinate.column}|row${coordinate.row}`)
+    return neighbouringCoordinates.has(`column${coordinate.column}|row${coordinate.row}`);
+  }
 }

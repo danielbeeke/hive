@@ -7,18 +7,6 @@ export class State {
       'attachPiece': ['attachPiece', 'movePiece'],
       'movePiece': ['attachPiece', 'movePiece'],
     };
-
-    document.addEventListener('keydown', (event) => {
-      const shortcuts = {
-        79: 'restoreSnapshot',
-        83: 'saveSnapshot'
-      };
-
-      if (event.which in shortcuts && event.ctrlKey) {
-        event.preventDefault();
-        this[shortcuts[event.which]]();
-      }
-    });
   }
 
   get currentPlayer () {
@@ -59,22 +47,5 @@ export class State {
       this.setPlayerState(playerId, action);
       this.currentPlayer = otherPlayer;
     }
-  }
-
-  /**
-   * Saves the complete state from the DOM because every state thing is an attribute.
-   */
-  saveSnapshot () {
-    this.board.cleanUpHighlights();
-    let app = document.querySelector('.app');
-    localStorage.setItem('snapshot', app.innerHTML);
-  }
-
-  /**
-   * Restores the complete state from the snapshot because every state thing is an attribute.
-   */
-  restoreSnapshot () {
-    let app = document.querySelector('.app');
-    app.innerHTML = localStorage.getItem('snapshot');
   }
 }
