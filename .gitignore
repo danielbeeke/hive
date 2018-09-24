@@ -4,4 +4,4 @@ src/css
 dist
 .vscode
 .publish
-
+shrinkwrap.yaml
