@@ -40,7 +40,8 @@ class App {
    * Saves the complete state from the DOM because every state thing is an attribute.
    */
   saveSnapshot () {
-    this.board.cleanUpHighlights();
+    let board = document.querySelector('hive-board');
+    board.cleanUpHighlights();
     let app = document.querySelector('.app');
     localStorage.setItem('snapshot', app.innerHTML);
   }

@@ -1,12 +1,14 @@
+import { ShadowScroll } from './ShadowScroll.js';
+
 customElements.define('hive-player', class HivePlayer extends HTMLElement {
 
   /**
    * If this HTML is loaded from a clean state we add all the pieces.
    */
   connectedCallback () {
-    if (!this.children.length) {
-      let player = this.getAttribute('player');
+    let player = this.getAttribute('player');
 
+    if (!this.children.length) {
       this.innerHTML = `
         <hive-queen player="${player}"></hive-queen>
   
@@ -31,5 +33,10 @@ customElements.define('hive-player', class HivePlayer extends HTMLElement {
         <hive-pillbug player="${player}"></hive-pillbug>
       `;
     }
+
+    new ShadowScroll(this, {
+      prefix: 'shadow-' + player
+    });
+
   }
 });
