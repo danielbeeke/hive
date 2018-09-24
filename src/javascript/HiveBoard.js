@@ -25,6 +25,16 @@ customElements.define('hive-board', class HiveBoard extends HTMLElement {
   }
 
   /**
+   * Deselects all selected pieces.
+   */
+  deselectAll () {
+    let selectedPieces = document.querySelectorAll('.insect.selected');
+    Array.from(selectedPieces).forEach((selectedPiece) => {
+      selectedPiece.deselect();
+    });
+  }
+
+  /**
    * Gives a set of tile coordinates, it attaches the right callback and ensure the highlighted tiles are set.
    * It fades out already and unneeded set highlights.
    *
@@ -137,6 +147,7 @@ customElements.define('hive-board', class HiveBoard extends HTMLElement {
    */
   attachPiece(data) {
     let piece = data.piece;
+    let hivePlayer = piece.parentNode;
 
     let clonedPiece = piece.cloneNode(true);
     let clonedPieceForPlayer = piece.cloneNode(true);
@@ -150,6 +161,7 @@ customElements.define('hive-board', class HiveBoard extends HTMLElement {
 
     clonedPieceForPlayer.oneAnimationEnd('disappear', () => {
       clonedPieceForPlayer.remove();
+      hivePlayer.dispatchEvent(new CustomEvent('attachedPiece'));
     });
     clonedPieceForPlayer.classList.add('disappear');
 

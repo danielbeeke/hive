@@ -8,10 +8,10 @@ export class Insect extends HTMLElement {
    */
   connectedCallback() {
     this.insectName = this.constructor.name.toLowerCase();
-    this.selected = false;
     this.events = [];
+    this.movingRules = [];
 
-    let f = 0.95;
+    let f = 0.945;
     let hexagon = `<svg class="hexagon-svg" viewBox="0 0 300 260">
       <polygon 
         class="hexagon-border" 
@@ -59,6 +59,7 @@ export class Insect extends HTMLElement {
 
       // First turn of player 2.
       else if (playerState === 'emptyBoard' && otherPlayerState !== 'emptyBoard') {
+        this.board.deselectAll();
         this.select();
         this.board.setHighlights(this.board.getSwarmNeighbouringTiles(), (clickedHighlight) => {
           this.state.transition(this.player, 'attachPiece', {
@@ -73,6 +74,7 @@ export class Insect extends HTMLElement {
       else if (['attachPiece', 'movePiece'].includes(playerState) && ['attachPiece', 'movePiece'].includes(otherPlayerState)) {
         // New piece to attach.
         if (this.parentNode !== this.board) {
+          this.board.deselectAll();
           this.select();
           this.board.highlightAttachTiles((clickedHighlight) => {
             this.state.transition(this.player, 'attachPiece', {
@@ -85,6 +87,7 @@ export class Insect extends HTMLElement {
         
         // Change a position of a piece.   
         else {
+          this.board.deselectAll();
           this.select();
           this.board.setHighlights(this.getHighlights(), (clickedHighlight) => {
             this.state.transition(this.player, 'movePiece', {
