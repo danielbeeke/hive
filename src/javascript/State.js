@@ -43,7 +43,9 @@ export class State {
     }
 
     if (typeof this.board[action] === 'function') {
-      this.board[action](data);
+      this.board[action](data, () => {
+        this.board.resizeAndMove();
+      });
       this.setPlayerState(playerId, action);
       this.currentPlayer = otherPlayer;
     }

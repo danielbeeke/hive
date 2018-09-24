@@ -136,16 +136,18 @@ customElements.define('hive-board', class HiveBoard extends HTMLElement {
   /**
    * Moves and animates a piece to a coordinate.
    * @param data
+   * @param callback
    */
-  movePiece (data) {
-    this.attachPiece(data);
+  movePiece (data, callback) {
+    this.attachPiece(data, callback);
   }
 
   /**
    * Attaches and animates a piece to a coordinate.
    * @param data
+   * @param callback
    */
-  attachPiece(data) {
+  attachPiece(data, callback) {
     let piece = data.piece;
     let hivePlayer = piece.parentNode;
 
@@ -175,10 +177,14 @@ customElements.define('hive-board', class HiveBoard extends HTMLElement {
     clonedPiece.oneTransitionEnd('transform', () => {
       this.appendChild(piece);
       clonedPiece.remove();
+      if (typeof callback === 'function') callback();
     });
     clonedPiece.style.transform = `translate(${clientRect.left}px, ${clientRect.top}px)`;
-
     piece.remove();
+  }
+
+  resizeAndMove () {
+    console.log('resizeAndMove')
   }
 
   /**

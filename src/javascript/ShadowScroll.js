@@ -17,6 +17,7 @@ export function ShadowScroll(element, options) {
 
   element.addEventListener('scroll', scroll);
   element.addEventListener('attachedPiece', scroll);
+  window.addEventListener('resize', scroll);
 
   scroll();
 }
