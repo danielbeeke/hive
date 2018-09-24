@@ -120,8 +120,8 @@
     transition: fill $speed ease-in-out;
   }
 
-  hive-player &[player="1"].selected,
-  hive-player &[player="1"]:hover,
+  hive-player-deck &[player="1"].selected,
+  hive-player-deck &[player="1"]:hover,
   [current-player="1"] &[player="1"].selected,
   [current-player="1"] &[player="1"]:hover {
     .hexagon-inner {
@@ -134,8 +134,8 @@
   }
 
 
-  hive-player &[player="2"].selected,
-  hive-player &[player="2"]:hover,
+  hive-player-deck &[player="2"].selected,
+  hive-player-deck &[player="2"]:hover,
   [current-player="2"] &[player="2"].selected,
   [current-player="2"] &[player="2"]:hover {
     .hexagon-inner {

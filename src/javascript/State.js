@@ -19,12 +19,12 @@ export class State {
   }
 
   getPlayerState(playerId) {
-    let player = document.querySelector(`hive-player[player="${playerId}"]`);
+    let player = document.querySelector(`hive-player-deck[player="${playerId}"]`);
     return player.getAttribute('state');
   }
 
   setPlayerState(playerId, action) {
-    let player = document.querySelector(`hive-player[player="${playerId}"]`);
+    let player = document.querySelector(`hive-player-deck[player="${playerId}"]`);
     player.setAttribute('state', action);
   }
 

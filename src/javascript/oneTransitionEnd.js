@@ -1,5 +1,7 @@
-let transitionEndType = whichTransitionEvent();
-
+/**
+ * Returns the name of the transitionend event.
+ * @returns {*}
+ */
 function whichTransitionEvent() {
   let t,
     el = document.createElement("fakeelement");
@@ -18,24 +20,10 @@ function whichTransitionEvent() {
   }
 }
 
-HTMLElement.prototype.oneTransitionEnd = function(property, callback) {
-  if (transitionEndType) {
-    let innerCallback = (event) => {
-      if (event.propertyName.substr(-(property.length)) === property && event.target === this) {
-        callback();
-        this.removeEventListener(transitionEndType, innerCallback);
-      }
-    };
-
-    this.addEventListener(transitionEndType, innerCallback);
-  } else {
-    callback();
-  }
-
-  return this;
-};
-
-let animationEndType = whichAnimationEvent();
+/**
+ * Returns the name of the animationend event.
+ * @returns {*}
+ */
 
 function whichAnimationEvent() {
   let t,
@@ -55,6 +43,48 @@ function whichAnimationEvent() {
   }
 }
 
+let transitionEndType = whichTransitionEvent();
+
+/**
+ * Easy attaching on one time callbacks when a css property is transitioned.
+ *
+ * How to use:
+ * element.oneTransitionEnd('opacity', () => { console.log('done') })
+ *
+ * @param property
+ * @param callback
+ * @returns {HTMLElement}
+ */
+HTMLElement.prototype.oneTransitionEnd = function(property, callback) {
+  if (transitionEndType) {
+    let innerCallback = (event) => {
+      if (event.propertyName.substr(-(property.length)) === property && event.target === this) {
+        callback();
+        this.removeEventListener(transitionEndType, innerCallback);
+      }
+    };
+
+    this.addEventListener(transitionEndType, innerCallback);
+  } else {
+    callback();
+  }
+
+  return this;
+};
+
+let animationEndType = whichAnimationEvent();
+
+
+/**
+ * Easy attaching on one time callbacks when a css animation is finished.
+ *
+ * How to use:
+ * element.oneAnimationEnd('opacity', () => { console.log('done') })
+ *
+ * @param animationName
+ * @param callback
+ * @returns {HTMLElement}
+ */
 HTMLElement.prototype.oneAnimationEnd = function(animationName, callback) {
   if (animationEndType) {
     let innerCallback = (event) => {

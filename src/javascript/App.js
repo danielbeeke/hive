@@ -11,7 +11,7 @@ import './insects/Queen.js';
 import './insects/Spider.js';
 
 import './HiveBoard.js';
-import './HivePlayer.js';
+import './HivePlayerDeck.js';
 
 class App {
   constructor () {
@@ -31,6 +31,7 @@ class App {
       }
     });
 
+    // Use http://localhost:3000?restore-snapshot for restoring on reload, happy debugging!
     if (location.search.substr(1) === 'restore-snapshot') {
       this.restoreSnapshot();
     }

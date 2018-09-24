@@ -12,7 +12,7 @@ customElements.define('hive-board', class HiveBoard extends HTMLElement {
    * Cleans up all highlights on the board.
    */
   cleanUpHighlights() {
-    let highlights = Array.from(this.children).filter(child => child.constructor.name === 'Highlight');
+    let highlights = Array.from(this.children).filter(child => child.insectName === 'highlight');
     highlights.forEach(highlight => {
       highlight.isInRemoval = true;
       highlight.oneTransitionEnd('opacity', () => {
@@ -82,12 +82,12 @@ customElements.define('hive-board', class HiveBoard extends HTMLElement {
     let borderTiles = new Map();
 
     Array.from(this.children).forEach((piece) => {
-      if (!piece.isInRemoval && piece.constructor.name !== 'Highlight') {
+      if (!piece.isInRemoval && piece.insectName !== 'highlight') {
         // Add all the existing pieces to the ignore list.
         ignoreTiles.set(`column${piece.column}|row${piece.row}`, { column: piece.column, row: piece.row });
 
         // For each existing piece get the neighbours.
-        let neighbours = Helpers.getNeighbours(piece.column, piece.row);
+        let neighbours = Helpers.getNeighbouringCoordinates(piece.column, piece.row);
 
         neighbours.forEach((neighbour) => {
           borderTiles.set(`column${neighbour.column}|row${neighbour.row}`, { column: neighbour.column, row: neighbour.row });
@@ -111,8 +111,8 @@ customElements.define('hive-board', class HiveBoard extends HTMLElement {
     let attachTiles = new Map();
     let otherPlayer = this.state.currentPlayer === 1 ? 2 : 1;
 
-    borderTiles.forEach((borderTile, key) => {
-      let borderTileNeighbours = Helpers.getNeighbours(borderTile.column, borderTile.row);
+    borderTiles.forEach((borderTile) => {
+      let borderTileNeighbours = Helpers.getNeighbouringCoordinates(borderTile.column, borderTile.row);
 
       let mayUsed = true;
 
@@ -134,7 +134,8 @@ customElements.define('hive-board', class HiveBoard extends HTMLElement {
   }
 
   /**
-   * Moves and animates a piece to a coordinate.
+   * Moves and animates one piece to a coordinate.
+   * Called via State.transition()
    * @param data
    * @param callback
    */
@@ -143,7 +144,9 @@ customElements.define('hive-board', class HiveBoard extends HTMLElement {
   }
 
   /**
-   * Attaches and animates a piece to a coordinate.
+   * Attaches and animates one piece to a coordinate.
+   * Called via State.transition()
+   *
    * @param data
    * @param callback
    */
@@ -183,6 +186,11 @@ customElements.define('hive-board', class HiveBoard extends HTMLElement {
     piece.remove();
   }
 
+  /**
+   * In this method I want to measure the grid and put an offset in the HiveBoard,
+   * which will be added to each Insect.position()
+   * Maybe there also need to be a transparent div inside the hive-board HTMLelement so the scrollbars are drawn.
+   */
   resizeAndMove () {
     console.log('resizeAndMove')
   }

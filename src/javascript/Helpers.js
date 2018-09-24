@@ -1,6 +1,12 @@
 export class Helpers {
 
-  static getNeighbours(column, row) {
+  /**
+   * Returns neighbour coordinates.
+   * @param column
+   * @param row
+   * @returns {Map}
+   */
+  static getNeighbouringCoordinates(column, row) {
     let neighbours = [
       { column: column - 1, row: row },
       { column: column + 1, row: row },
@@ -19,17 +25,24 @@ export class Helpers {
     return neighbourMap;
   }
 
-  static getBoard(depth = 3) {
-    let tiles = [...Helpers.getNeighbours(0, 0).values()];
-    let board = {}
+  /**
+   * Returns a Map of coordinates for circle board for debugging.
+   * The more circles the bigger the board.
+   *
+   * @param circles
+   * @returns {*[]}
+   */
+  static getBoard(circles = 3) {
+    let tiles = [...Helpers.getNeighbouringCoordinates(0, 0).values()];
+    let board = {};
 
     tiles.forEach((tile) => {
       board[tile.column + '-' + tile.row] = tile;
     });
 
-    for (let index = 0; index < depth; index++) {
+    for (let index = 0; index < circles; index++) {
       tiles.forEach((tile) => {
-        let neighbours = Helpers.getNeighbours(tile.column, tile.row);
+        let neighbours = Helpers.getNeighbouringCoordinates(tile.column, tile.row);
 
         neighbours.forEach((neighbour) => {
           if (!board[neighbour.column + '-' + neighbour.row]) {
@@ -42,28 +55,5 @@ export class Helpers {
 
     return tiles;
   }
-
-  static breaksHive (removedTile, board) {
-    let group = new Set();
-
-    let appendToGroup = (piece) => {
-      console.log(piece)
-      // let neighbours = Helpers.getNeighbours(piece.column, piece.row);
-      
-      // neighbours.forEach((neighbour) => {
-      //   let selector = `.insect[c="${neighbour.column}"][r="${neighbour.row}"]:not(hive-highlight)`;
-      //   let neighbourPiece = document.querySelector(selector);
-
-      //   if (neighbourPiece && !neighbourPiece.isInRemoval && neighbour !== removedTile && !group.has(neighbourPiece)) {
-      //     appendToGroup(neighbourPiece);
-      //     group.add(neighbourPiece);
-      //   }
-      // });  
-    }
-
-
-    return false;
-  }
-
 
 }

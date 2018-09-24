@@ -7,12 +7,27 @@ export class Insect extends HTMLElement {
    * Creates the HTML and SVG.
    */
   connectedCallback() {
-    this.insectName = this.constructor.name.toLowerCase();
     this.events = [];
     this.movingRules = [];
+    this.insectName = this.constructor.name.toLowerCase();
+    this.classList.add(this.insectName, 'insect');
 
+    this.createMarkup();
+
+    if (this.insectName !== 'highlight') {
+      this.addEventListener('click', () => {
+        this.click();
+      });
+    }
+  }
+
+  /**
+   * Creates the SVG polygons, one for the whole piece that is used as a border and one for the inner polygon.
+   */
+  createMarkup() {
     let f = 0.945;
-    let hexagon = `<svg class="hexagon-svg" viewBox="0 0 300 260">
+
+    this.innerHTML = `<svg class="hexagon-svg" viewBox="0 0 300 260">
       <polygon 
         class="hexagon-border" 
         points="300,130 225,260 75,260 0,130 75,0 225,0">
@@ -24,44 +39,61 @@ export class Insect extends HTMLElement {
       </polygon>
     </svg>`;
 
-    if (['highlight'].includes(this.insectName)) {
-      this.innerHTML = hexagon;
-    } else {
-      this.innerHTML = hexagon + `<img src="images/${this.insectName}.png">`
+    // Add the piece image if needed.
+    if (!['highlight'].includes(this.insectName)) {
+      this.innerHTML += `<img src="images/${this.insectName}.png">`
     }
 
-    this.classList.add(this.insectName, 'insect');
-
-    if (this.insectName !== 'highlight') {
-      this.attachClick();
-    }
   }
 
   /**
-   * Attaches a click event that handles the player turns.
+   * Click event that handles the player turns.
    */
-  attachClick () {
-    this.addEventListener('click', () => {
-      let otherPlayer = this.player === 1 ? 2 : 1;
-      if (this.state.currentPlayer === otherPlayer) return;
+  click () {
+    let otherPlayer = this.player === 1 ? 2 : 1;
+    if (this.state.currentPlayer === otherPlayer) return;
 
-      let playerState = this.state.getPlayerState(this.player);
-      let otherPlayerState = this.state.getPlayerState(otherPlayer);
+    let playerState = this.state.getPlayerState(this.player);
+    let otherPlayerState = this.state.getPlayerState(otherPlayer);
 
-      // Starting point.
-      if (playerState === 'emptyBoard' && otherPlayerState === 'emptyBoard') {
+    // Starting point of the game.
+    if (
+      playerState === 'emptyBoard' &&
+      otherPlayerState === 'emptyBoard'
+    ) {
+      this.state.transition(this.player, 'attachPiece', {
+        piece: this,
+        row: 0,
+        column: 0
+      });
+    }
+
+    // First turn of player 2.
+    else if (
+      playerState === 'emptyBoard' &&
+      otherPlayerState !== 'emptyBoard'
+    ) {
+      this.board.deselectAll();
+      this.select();
+      this.board.setHighlights(this.board.getSwarmNeighbouringTiles(), (clickedHighlight) => {
         this.state.transition(this.player, 'attachPiece', {
           piece: this,
-          row: 0,
-          column: 0
+          row: clickedHighlight.row,
+          column: clickedHighlight.column
         });
-      }
+      });
+    }
 
-      // First turn of player 2.
-      else if (playerState === 'emptyBoard' && otherPlayerState !== 'emptyBoard') {
+    // Other turns.
+    else if (
+      ['attachPiece', 'movePiece'].includes(playerState) &&
+      ['attachPiece', 'movePiece'].includes(otherPlayerState)
+    ) {
+      // New piece to attach.
+      if (this.parentNode !== this.board) {
         this.board.deselectAll();
         this.select();
-        this.board.setHighlights(this.board.getSwarmNeighbouringTiles(), (clickedHighlight) => {
+        this.board.highlightAttachTiles((clickedHighlight) => {
           this.state.transition(this.player, 'attachPiece', {
             piece: this,
             row: clickedHighlight.row,
@@ -70,41 +102,38 @@ export class Insect extends HTMLElement {
         });
       }
 
-      // Other turns.
-      else if (['attachPiece', 'movePiece'].includes(playerState) && ['attachPiece', 'movePiece'].includes(otherPlayerState)) {
-        // New piece to attach.
-        if (this.parentNode !== this.board) {
-          this.board.deselectAll();
-          this.select();
-          this.board.highlightAttachTiles((clickedHighlight) => {
-            this.state.transition(this.player, 'attachPiece', {
-              piece: this,
-              row: clickedHighlight.row,
-              column: clickedHighlight.column
-            });
+      // Change a position of a piece.
+      else {
+        this.board.deselectAll();
+        this.select();
+        this.board.setHighlights(this.getHighlights(), (clickedHighlight) => {
+          this.state.transition(this.player, 'movePiece', {
+            piece: this,
+            row: clickedHighlight.row,
+            column: clickedHighlight.column
           });
-        }
-        
-        // Change a position of a piece.   
-        else {
-          this.board.deselectAll();
-          this.select();
-          this.board.setHighlights(this.getHighlights(), (clickedHighlight) => {
-            this.state.transition(this.player, 'movePiece', {
-              piece: this,
-              row: clickedHighlight.row,
-              column: clickedHighlight.column
-            });
-          });
-        }
+        });
       }
-    });
+    }
   }
 
+  /**
+   * Callback of the CustomElements API,
+   * We tell which HTML attributes we want to observe / use.
+   * @returns {string[]}
+   */
   static get observedAttributes() {
     return ['c', 'r'];
   }
 
+  /**
+   * Callback of the CustomElements API,
+   * Our attributes are changed.
+   *
+   * @param attrName
+   * @param oldVal
+   * @param newVal
+   */
   attributeChangedCallback(attrName, oldVal, newVal) {
     if (['c', 'r'].includes(attrName)) {
       this.applyPosition();
@@ -113,6 +142,7 @@ export class Insect extends HTMLElement {
 
   /**
    * This is the only code needed for positioning the hexagon grid.
+   * TODO We need to add an offset here. See HiveBoard.resizeAndMove()
    */
   applyPosition() {
     let row = parseInt(this.getAttribute('r'));
@@ -124,55 +154,35 @@ export class Insect extends HTMLElement {
     this.setAttribute('style', `transform: translate(${x}%, ${y}%);`);
   }
 
-  get state() {
-    return this.board.state;
-  }
+  /**
+   * All kinds of getters and setters and toggle functions.
+   * @returns {*}
+   */
+  get state() { return this.board.state }
+  get board() { return document.querySelector('hive-board') }
+  set player(value) { this.setAttribute('player', value) }
+  get player() { return parseInt(this.getAttribute('player')) }
+  set row(value) { this.setAttribute('r', value) }
+  get row() { if (this.getAttribute('r') !== null) return parseInt(this.getAttribute('r')) }
+  set column(value) { this.setAttribute('c', value) }
+  get column() { if (this.getAttribute('c') !== null) return parseInt(this.getAttribute('c')) }
+  select() { this.classList.add('selected') }
+  deselect() { this.classList.remove('selected') }
 
-  get board() {
-    return document.querySelector('hive-board');
-  }
-
-  set player(value) {
-    this.setAttribute('player', value);
-  }
-
-  get player() {
-    return parseInt(this.getAttribute('player'));
-  }
-
-  set row(value) {
-    this.setAttribute('r', value);
-  }
-
-  get row() {
-    if (this.getAttribute('r') === null) { return null; }
-    return parseInt(this.getAttribute('r'));
-  }
-
-  set column(value) {
-    this.setAttribute('c', value);
-  }
-
-  get column() {
-    if (this.getAttribute('c') === null) { return null; }
-    return parseInt(this.getAttribute('c'));
-  }
-
-  select() {
-    this.classList.add('selected');
-    this.selected = true;
-  }
-
-  deselect() {
-    this.classList.remove('selected');
-    this.selected = false;
-  }
-  
+  /**
+   * We needed a way to remove event callbacks, for this you need the callback inside removeEventListener.
+   * So we push them in an array to later remove them when needed.
+   * @param eventName
+   * @param callback
+   */
   on(eventName, callback) {
     this.events.push({ eventName, callback });
     this.addEventListener(eventName, callback);
   }
 
+  /**
+   * See on()
+   */
   removeAllEvents() {
     this.events.forEach((event) => {
       this.removeEventListener(event.eventName, event.callback);
@@ -180,8 +190,9 @@ export class Insect extends HTMLElement {
   }
 
   /**
-   * This method returns all the possible tiles, the swarm border and the pieces them self.
-   * Then we iterate over this.movingRules, that array contains all the moving rules for the current piece.
+   * This method returns all the possible tiles, the swarm border and the pieces them self,
+   * after that we iterate over this.movingRules, that array contains all the moving rules for the current piece.
+   * The movingRules deny turns that are impossible.
    *
    * @returns {Map}
    */
@@ -189,13 +200,13 @@ export class Insect extends HTMLElement {
     let coordinates = this.board.getSwarmNeighbouringTiles();
 
     Array.from(this.board.children).forEach((piece) => {
-      if (piece.constructor.name !== 'Highlight' && piece !== this) {
+      if (piece.insectName !== 'highlight' && piece !== this) {
         coordinates.set(`column${piece.column}|row${piece.row}`, { column: piece.column, row: piece.row });
       }
     });
 
     coordinates.forEach((coordinate) => {
-      const neighbouringCoordinates = Helpers.getNeighbours(this.column, this.row);
+      const neighbouringCoordinates = Helpers.getNeighbouringCoordinates(this.column, this.row);
       const moveIsAllowed = (movingRule) => movingRule(coordinate, neighbouringCoordinates);
 
       if (!this.movingRules.every(moveIsAllowed)) {
