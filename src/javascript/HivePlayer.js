@@ -1,3 +1,5 @@
+import { ShadowScroll } from './ShadowScroll.js';
+
 customElements.define('hive-player', class HivePlayer extends HTMLElement {
 
   /**
@@ -31,5 +33,8 @@ customElements.define('hive-player', class HivePlayer extends HTMLElement {
         <hive-pillbug player="${player}"></hive-pillbug>
       `;
     }
+
+    new ShadowScroll(this);
+
   }
 });

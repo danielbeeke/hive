@@ -11,22 +11,6 @@ hive-player {
   padding-bottom: 40px;
   font-size: 0;
 
-  //&:before {
-  //  content: '';
-  //  display: inline-block;
-  //  flex: 0 0 auto;
-  //  width: 15px;
-  //  height: 40px;
-  //}
-  //
-  //&:after {
-  //  content: '';
-  //  display: inline-block;
-  //  flex: 0 0 auto;
-  //  width: 20px;
-  //  height: 40px;
-  //}
-
   &[player="1"] {
     order: 1;
   }
