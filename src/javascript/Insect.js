@@ -27,7 +27,7 @@ export class Insect extends HTMLElement {
     if (['highlight'].includes(this.insectName)) {
       this.innerHTML = hexagon;
     } else {
-      this.innerHTML = hexagon + `<img src="/images/${this.insectName}.png">`
+      this.innerHTML = hexagon + `<img src="images/${this.insectName}.png">`
     }
 
     this.classList.add(this.insectName, 'insect');

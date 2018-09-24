@@ -1,3 +1,5 @@
 node_modules
 src/css
 .idea
+dist
+.vscode
