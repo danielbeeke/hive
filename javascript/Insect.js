@@ -1,9 +1,10 @@
-import { Helpers } from '../Helpers.js'
+import { Helpers } from './Helpers.js'
 
 export class Insect extends HTMLElement {
 
   /**
    * CustomElement initialisation.
+   * Creates the HTML and SVG.
    */
   connectedCallback() {
     this.insectName = this.constructor.name.toLowerCase();
@@ -23,7 +24,7 @@ export class Insect extends HTMLElement {
       </polygon>
     </svg>`;
 
-    if (['proposed'].includes(this.insectName)) {
+    if (['highlight'].includes(this.insectName)) {
       this.innerHTML = hexagon;
     } else {
       this.innerHTML = hexagon + `<img src="/images/${this.insectName}.png">`
@@ -31,11 +32,14 @@ export class Insect extends HTMLElement {
 
     this.classList.add(this.insectName, 'insect');
 
-    if (this.insectName !== 'proposed') {
+    if (this.insectName !== 'highlight') {
       this.attachClick();
     }
   }
 
+  /**
+   * Attaches a click event that handles the player turns.
+   */
   attachClick () {
     this.addEventListener('click', () => {
       let otherPlayer = this.player === 1 ? 2 : 1;
@@ -56,11 +60,11 @@ export class Insect extends HTMLElement {
       // First turn of player 2.
       else if (playerState === 'emptyBoard' && otherPlayerState !== 'emptyBoard') {
         this.select();
-        this.board.setHighlights(this.board.getSwarmNeighbouringTiles(), (clickedProposed) => {
+        this.board.setHighlights(this.board.getSwarmNeighbouringTiles(), (clickedHighlight) => {
           this.state.transition(this.player, 'attachPiece', {
             piece: this,
-            row: clickedProposed.row,
-            column: clickedProposed.column
+            row: clickedHighlight.row,
+            column: clickedHighlight.column
           });
         });
       }
@@ -70,11 +74,11 @@ export class Insect extends HTMLElement {
         // New piece to attach.
         if (this.parentNode !== this.board) {
           this.select();
-          this.board.highlightAttachTiles((clickedProposed) => {
+          this.board.highlightAttachTiles((clickedHighlight) => {
             this.state.transition(this.player, 'attachPiece', {
               piece: this,
-              row: clickedProposed.row,
-              column: clickedProposed.column
+              row: clickedHighlight.row,
+              column: clickedHighlight.column
             });
           });
         }
@@ -82,11 +86,11 @@ export class Insect extends HTMLElement {
         // Change a position of a piece.   
         else {
           this.select();
-          this.board.setHighlights(this.getHighlights(), (clickedProposed) => {
+          this.board.setHighlights(this.getHighlights(), (clickedHighlight) => {
             this.state.transition(this.player, 'movePiece', {
               piece: this,
-              row: clickedProposed.row,
-              column: clickedProposed.column
+              row: clickedHighlight.row,
+              column: clickedHighlight.column
             });
           });
         }
@@ -104,6 +108,9 @@ export class Insect extends HTMLElement {
     }
   }
 
+  /**
+   * This is the only code needed for positioning the hexagon grid.
+   */
   applyPosition() {
     let row = parseInt(this.getAttribute('r'));
     let column = parseInt(this.getAttribute('c'));
@@ -169,20 +176,79 @@ export class Insect extends HTMLElement {
     })
   }
 
+  /**
+   * This method returns all the possible tiles, the swarm border and the pieces them self.
+   * Then we iterate over this.movingRules, that array contains all the moving rules for the current piece.
+   *
+   * @returns {Map}
+   */
   getHighlights() {
-    return new Map();
+    let coordinates = this.board.getSwarmNeighbouringTiles();
+
+    Array.from(this.board.children).forEach((piece) => {
+      if (piece.constructor.name !== 'Highlight' && piece !== this) {
+        coordinates.set(`column${piece.column}|row${piece.row}`, { column: piece.column, row: piece.row });
+      }
+    });
+
+    coordinates.forEach((coordinate) => {
+      const neighbouringCoordinates = Helpers.getNeighbours(this.column, this.row);
+      const moveIsAllowed = (movingRule) => movingRule(coordinate, neighbouringCoordinates);
+
+      if (!this.movingRules.every(moveIsAllowed)) {
+        coordinates.delete(`column${coordinate.column}|row${coordinate.row}`);
+      }
+    });
+
+    return coordinates;
   }
 
-  // Can physically move to the coordinate
-  canPhysicallyFitThrough (coordinate) {
-    console.log('hii')
+
+  /**
+   * Game rule:
+   * Can physically move to the coordinate
+   *
+   * @param coordinate
+   * @param neighbouringCoordinates
+   * @returns {boolean}
+   */
+  canPhysicallyFitThrough (coordinate, neighbouringCoordinates) {
+    // For each step we need to check if the surrounding tiles are enclosing the path.
+    console.log(coordinate)
     return true;
   }
 
-  // During the movement of the piece, the swarm must not be separated
-  // Therefor, we don't need to know any arguments
+  /**
+   * Game rule:
+   * During the movement of the piece, the swarm must not be separated,
+   * Therefor, we don't need to know any arguments
+   *
+   * @returns {boolean}
+   */
   maintainsSwarm () {
-
+    return true;
   }
 
+
+  /**
+   * Game rule:
+   * Some pieces may not move on top of others.
+   * @returns {boolean}
+   */
+  isEmptySpot (coordinate) {
+    let selector = `.insect[c="${coordinate.column}"][r="${coordinate.row}"]`;
+    let piece = document.querySelector(selector);
+    return !piece;
+  }
+
+  /**
+   * A couple of piece may step one step at a time.
+   * @param coordinate
+   * @param neighbouringCoordinates
+   * @returns {boolean}
+   */
+  isNeighbour (coordinate, neighbouringCoordinates) {
+    console.log(neighbouringCoordinates, `column${coordinate.column}|row${coordinate.row}`)
+    return neighbouringCoordinates.has(`column${coordinate.column}|row${coordinate.row}`);
+  }
 }

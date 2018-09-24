@@ -51,7 +51,7 @@ export class Helpers {
       // let neighbours = Helpers.getNeighbours(piece.column, piece.row);
       
       // neighbours.forEach((neighbour) => {
-      //   let selector = `.insect[c="${neighbour.column}"][r="${neighbour.row}"]:not(hive-proposed)`;
+      //   let selector = `.insect[c="${neighbour.column}"][r="${neighbour.row}"]:not(hive-highlight)`;
       //   let neighbourPiece = document.querySelector(selector);
 
       //   if (neighbourPiece && !neighbourPiece.isInRemoval && neighbour !== removedTile && !group.has(neighbourPiece)) {

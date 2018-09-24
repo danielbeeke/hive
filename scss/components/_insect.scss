@@ -11,13 +11,13 @@
 @keyframes disappear {
   from {
     opacity: 0;
-    max-width: calc(var(--hexagon-size) * 2);
+    width: calc(var(--hexagon-size) * 2);
     margin: 0 10px;
   }
 
   to {
     opacity: 0;
-    max-width: 0;
+    width: 0;
     margin: 0 0;
   }
 }
@@ -102,7 +102,8 @@
       fill: var(--player-1);
     }
   }
-  &.proposed {
+
+  &.highlight {
     opacity: 1;
     cursor: pointer;
     animation: fadeIn .5s;

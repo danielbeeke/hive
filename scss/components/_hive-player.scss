@@ -4,12 +4,31 @@ $delay-from-inactive-to-active: 1s;
 hive-player {
   width: 100%;
   overflow-x: scroll;
-  flex: 0 0 170px;
+  overflow-y: hidden;
+  flex: 0 0 85px;
   background-color: rgba(white, .1);
-  align-items: center;
-  display: flex;
-  flex-wrap: nowrap;
   transition: background-color $speed cubic-bezier(.3,.14,.36,1) $delay-from-active-to-inactive;
+  text-align: center;
+  white-space: nowrap;
+  padding-top: 40px;
+  padding-bottom: 40px;
+  font-size: 0;
+
+  &:before {
+    content: '';
+    display: inline-block;
+    flex: 0 0 auto;
+    width: 15px;
+    height: 40px;
+  }
+
+  &:after {
+    content: '';
+    display: inline-block;
+    flex: 0 0 auto;
+    width: 20px;
+    height: 40px;
+  }
 
   &[player="1"] {
     order: 1;
@@ -21,7 +40,7 @@ hive-player {
 
   .insect {
     margin: 5px 10px;
-    flex: 0 0 auto;
+    display: inline-block;
     transition-property: opacity, filter;
     transition-duration: $speed;
     transition-timing-function: cubic-bezier(.3,.14,.36,1);
