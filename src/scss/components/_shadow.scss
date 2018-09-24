@@ -1,0 +1,25 @@
+.shadow-left,
+.shadow-right {
+  width: 40px;
+  height: 160px;
+  position: absolute;
+  top: 0;
+  opacity: 0;
+  z-index: 403;
+  transition: opacity $speed ease-in-out;
+}
+
+.shadow-left {
+  background: linear-gradient(to right, rgba(black, 1) 0%, rgba(black, .2) 30%, rgba(black, 0) 100%);
+  left: 0;
+}
+
+.shadow-right {
+  background: linear-gradient(to left, rgba(black, 1) 0%, rgba(black, .2) 30%, rgba(black, 0) 100%);
+  right: 0;
+}
+
+.shadow-2 {
+  top: auto;
+  bottom: 0;
+}

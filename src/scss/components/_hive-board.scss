@@ -20,7 +20,7 @@ hive-board {
     background-color: $gray;
     display: block;
     height: 22px;
-    z-index: 100;
+    z-index: 300;
     transition: background-color $speed cubic-bezier(.3,.14,.36,1) $delay-from-active-to-inactive;
   }
 
