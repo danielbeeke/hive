@@ -4,11 +4,34 @@ hive-board {
   display: block;
   flex: 1 1 auto;
   order: 2;
+  position: relative;
 
   .insect {
     position: absolute;
     left: 50%;
     top: 50%;
     transform: translate(-50%, -50%);
+    z-index: 200;
+  }
+
+  &:before, &:after {
+    content: '';
+    width: 100%;
+    background-color: $gray;
+    display: block;
+    height: 22px;
+    z-index: 100;
+    transition: background-color $speed cubic-bezier(.3,.14,.36,1) $delay-from-active-to-inactive;
+  }
+
+  &:before {
+    position: absolute;
+    bottom: 100%;
+
+  }
+
+  &:after {
+    position: fixed;
+    bottom: 0;
   }
 }

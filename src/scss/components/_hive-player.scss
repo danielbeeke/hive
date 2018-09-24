@@ -1,12 +1,9 @@
-$delay-from-active-to-inactive: 1s;
-$delay-from-inactive-to-active: 1s;
-
 hive-player {
   width: 100%;
   overflow-x: scroll;
   overflow-y: hidden;
-  flex: 0 0 85px;
-  background-color: rgba(white, .1);
+  flex: 0 0 80px;
+  background-color: $gray;
   transition: background-color $speed cubic-bezier(.3,.14,.36,1) $delay-from-active-to-inactive;
   text-align: center;
   white-space: nowrap;
@@ -14,21 +11,21 @@ hive-player {
   padding-bottom: 40px;
   font-size: 0;
 
-  &:before {
-    content: '';
-    display: inline-block;
-    flex: 0 0 auto;
-    width: 15px;
-    height: 40px;
-  }
-
-  &:after {
-    content: '';
-    display: inline-block;
-    flex: 0 0 auto;
-    width: 20px;
-    height: 40px;
-  }
+  //&:before {
+  //  content: '';
+  //  display: inline-block;
+  //  flex: 0 0 auto;
+  //  width: 15px;
+  //  height: 40px;
+  //}
+  //
+  //&:after {
+  //  content: '';
+  //  display: inline-block;
+  //  flex: 0 0 auto;
+  //  width: 20px;
+  //  height: 40px;
+  //}
 
   &[player="1"] {
     order: 1;
@@ -39,18 +36,32 @@ hive-player {
   }
 
   .insect {
-    margin: 5px 10px;
+    margin: 5px 5px;
     display: inline-block;
     transition-property: opacity, filter;
     transition-duration: $speed;
     transition-timing-function: cubic-bezier(.3,.14,.36,1);
     transition-delay: $delay-from-inactive-to-active;
     filter: grayscale(0);
+
+    &:first-child {
+      margin-left: 40px;
+    }
+
+    &:last-child {
+      margin-right: 40px;
+    }
+
+    &:first-child:last-child {
+      margin-left: 40px;
+      margin-right: 40px;
+    }
   }
+
 
   hive-board[current-player="1"] ~ &[player="1"],
   hive-board[current-player="2"] ~ &[player="2"] {
-    background-color: rgba(white, .3);
+    background-color: $gray_light;
     transition-delay: $delay-from-inactive-to-active;
   }
 
@@ -66,3 +77,8 @@ hive-player {
   }
 }
 
+hive-board[current-player="1"]:before,
+hive-board[current-player="2"]:after {
+  background-color: $gray_light;
+  transition-delay: $delay-from-inactive-to-active;
+}

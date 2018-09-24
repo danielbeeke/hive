@@ -8,11 +8,55 @@
   }
 }
 
+@keyframes disappearLeft {
+  from {
+    opacity: 0;
+    width: calc(var(--hexagon-size) * 2);
+    margin: 0 5px;
+    margin-left: 40px;
+  }
+
+  to {
+    opacity: 0;
+    width: 0;
+    margin: 0 0;
+  }
+}
+
+@keyframes disappearRight {
+  from {
+    opacity: 0;
+    width: calc(var(--hexagon-size) * 2);
+    margin: 0 5px;
+    margin-right: 40px;
+  }
+
+  to {
+    opacity: 0;
+    width: 0;
+    margin: 0 0;
+  }
+}
+
+@keyframes disappearBoth {
+  from {
+    opacity: 0;
+    width: calc(var(--hexagon-size) * 2);
+    margin: 0 40px;
+  }
+
+  to {
+    opacity: 0;
+    width: 0;
+    margin: 0 0;
+  }
+}
+
 @keyframes disappear {
   from {
     opacity: 0;
     width: calc(var(--hexagon-size) * 2);
-    margin: 0 10px;
+    margin: 0 5px;
   }
 
   to {
@@ -131,5 +175,21 @@
 
   &.disappear {
     animation: disappear .7s forwards;
+
+    &:first-child {
+      animation: disappearLeft .7s forwards;
+    }
+
+    &:last-child {
+      animation: disappearRight .7s forwards;
+    }
+
+    &:first-child:last-child {
+      animation: disappearBoth .7s forwards;
+    }
   }
+}
+
+body > .insect {
+  z-index: 400;
 }
