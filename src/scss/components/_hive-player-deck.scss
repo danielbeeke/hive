@@ -1,15 +1,14 @@
 hive-player-deck {
   width: 100%;
-  overflow-x: scroll;
-  overflow-y: hidden;
-  flex: 0 0 80px;
+  flex: 0 0 auto;
+  height: calc(#{sqrt(3)} * var(--hexagon-size) + 12px);
   background-color: $gray;
   transition: background-color $speed cubic-bezier(.3,.14,.36,1) $delay-from-active-to-inactive;
   text-align: center;
   white-space: nowrap;
-  padding-top: 40px;
-  padding-bottom: 40px;
   font-size: 0;
+  overflow: hidden;
+  position: relative;
 
   &[player="1"] {
     order: 1;
@@ -51,6 +50,8 @@ hive-player-deck {
 
   hive-board:not([current-player="1"]) ~ &[player="1"],
   hive-board:not([current-player="2"]) ~ &[player="2"] {
+    pointer-events: none;
+
     .insect {
       opacity: 0.5;
       filter: grayscale(90%);
@@ -59,10 +60,11 @@ hive-player-deck {
       transition-delay: $delay-from-active-to-inactive;
     }
   }
-}
 
-hive-board[current-player="1"]:before,
-hive-board[current-player="2"]:after {
-  background-color: $gray_light;
-  transition-delay: $delay-from-inactive-to-active;
+  .hive-playeer-deck-inner {
+    position: relative;
+    height: calc(100% + 20px);
+    overflow-x: auto;
+    overflow-y: hidden;  
+  }
 }

@@ -1,10 +1,10 @@
 hive-board {
   width: 100%;
-  height: 100%;
   display: block;
   flex: 1 1 auto;
   order: 2;
   position: relative;
+  overflow: hidden;
 
   .insect {
     position: absolute;
@@ -14,24 +14,8 @@ hive-board {
     z-index: 200;
   }
 
-  &:before, &:after {
-    content: '';
-    width: 100%;
-    background-color: $gray;
-    display: block;
-    height: 22px;
-    z-index: 300;
-    transition: background-color $speed cubic-bezier(.3,.14,.36,1) $delay-from-active-to-inactive;
-  }
-
-  &:before {
+  .board-sizer {
     position: absolute;
-    bottom: 100%;
-
-  }
-
-  &:after {
-    position: fixed;
-    bottom: 0;
+    // background-color: red;
   }
 }

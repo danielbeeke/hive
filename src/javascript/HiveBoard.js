@@ -1,11 +1,19 @@
 import { State } from './State.js';
 import { Helpers } from './Helpers.js';
+import { TouchScroll } from './TouchScroll.js';
 
 customElements.define('hive-board', class HiveBoard extends HTMLElement {
   constructor() {
     super();
 
     this.state = new State(this);
+    this.boardSizer = document.createElement('div');
+    this.boardSizer.classList.add('board-sizer');
+    this.appendChild(this.boardSizer);
+  }
+
+  connectedCallback () {
+    new TouchScroll(this);
   }
 
   /**
@@ -82,7 +90,7 @@ customElements.define('hive-board', class HiveBoard extends HTMLElement {
     let borderTiles = new Map();
 
     Array.from(this.children).forEach((piece) => {
-      if (!piece.isInRemoval && piece.insectName !== 'highlight') {
+      if (!piece.isInRemoval && piece.insectName !== 'highlight' && piece.nodeName.substring(0, 4) === 'HIVE') {
         // Add all the existing pieces to the ignore list.
         ignoreTiles.set(`column${piece.column}|row${piece.row}`, { column: piece.column, row: piece.row });
 
@@ -156,11 +164,10 @@ customElements.define('hive-board', class HiveBoard extends HTMLElement {
 
     let clonedPiece = piece.cloneNode(true);
     let clonedPieceForPlayer = piece.cloneNode(true);
-    clonedPiece.style.position = 'fixed';
     let clientRect = piece.getBoundingClientRect();
-    clonedPiece.style.transform = `translate(${clientRect.left}px, ${clientRect.top}px)`;
     document.body.appendChild(clonedPiece);
-
+    clonedPiece.style.cssText = `transform: translateY(${clientRect.top}px); position: fixed;`;
+    clonedPiece.querySelector('.insect-inner').style.cssText = `transform: translateX(${clientRect.left}px);`;
     piece.parentNode.insertBefore(clonedPieceForPlayer, piece.nextSibling);
     this.appendChild(piece);
 
@@ -182,7 +189,10 @@ customElements.define('hive-board', class HiveBoard extends HTMLElement {
       clonedPiece.remove();
       if (typeof callback === 'function') callback();
     });
-    clonedPiece.style.transform = `translate(${clientRect.left}px, ${clientRect.top}px)`;
+
+    clonedPiece.style.transform = `translateY(${clientRect.top}px)`;
+    clonedPiece.querySelector('.insect-inner').style.transform = `translateX(${clientRect.left}px)`;
+
     piece.remove();
   }
 
@@ -192,7 +202,37 @@ customElements.define('hive-board', class HiveBoard extends HTMLElement {
    * Maybe there also need to be a transparent div inside the hive-board HTMLelement so the scrollbars are drawn.
    */
   resizeAndMove () {
-    console.log('resizeAndMove')
+    let top = 0, left = 0, bottom = 0, right = 0;
+    Array.from(this.children).forEach((child) => {
+      if (child !== this.boardSizer) {
+        let x = child.column * 75 - 50;
+        let y = ((child.row * 100) - 50) + (child.column * 50);
+
+        if (top > y) top = y;
+        if (left > x) left = x;
+        if (right < x) right = x;
+        if (bottom < y) bottom = y;
+      }
+    });
+
+    let firstPiece = this.querySelector('.insect');
+    let insectCount = this.querySelectorAll('.insect').length;
+
+    let halfBoardWidth = this.clientWidth / 2;
+    let halfBoardHeight = this.clientHeight / 2;
+
+    let pxTop = halfBoardHeight + top * firstPiece.clientHeight / 100;
+    let pxLeft = halfBoardWidth + left * firstPiece.clientWidth / 100;
+    let pxRight = halfBoardWidth + right * firstPiece.clientWidth / 100;
+    let pxBottom = halfBoardHeight + bottom * firstPiece.clientHeight / 100;
+
+    let padding = 170;
+    let halfPadding = padding / 2;
+
+    this.boardSizer.style.top = pxTop - halfPadding + 'px';
+    this.boardSizer.style.left = pxLeft - halfPadding + 'px';
+    this.boardSizer.style.width = pxRight - pxLeft + (firstPiece.clientWidth / (insectCount > 1 ? 1 : 2)) + padding + 'px';
+    this.boardSizer.style.height = pxBottom - pxTop + (firstPiece.clientHeight / (insectCount > 1 ? 1 : 2)) + padding + 'px';
   }
 
   /**

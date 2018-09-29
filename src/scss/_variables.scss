@@ -6,7 +6,7 @@ $delay-from-inactive-to-active: 1s;
 
 
 :root {
-  --hexagon-size: 40px;
+  --hexagon-size: 24px;
   --player-1: white;
   --player-highlight-1: green;
   --player-2: black;
@@ -16,4 +16,9 @@ $delay-from-inactive-to-active: 1s;
 
   --speed: .4s;
   --easing: ease-in-out;
+
+
+  @media only screen and (min-width: 720px) {
+    --hexagon-size: 40px;
+  }
 }
