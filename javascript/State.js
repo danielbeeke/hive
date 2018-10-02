@@ -44,7 +44,7 @@ export class State {
 
     if (typeof this.board[action] === 'function') {
       this.board[action](data, () => {
-        this.board.resizeAndMove();
+        // If we need post turn callback.
       });
       this.setPlayerState(playerId, action);
       this.currentPlayer = otherPlayer;

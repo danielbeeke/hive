@@ -1,5 +1,5 @@
 :root {
-  --hexagon-size: 40px;
+  --hexagon-size: 24px;
   --player-1: white;
   --player-highlight-1: green;
   --player-2: black;
@@ -7,6 +7,9 @@
   --bee-color: yellow;
   --speed: .4s;
   --easing: ease-in-out; }
+  @media only screen and (min-width: 720px) {
+    :root {
+      --hexagon-size: 40px; } }
 
 .app {
   display: -webkit-box;
@@ -23,7 +26,6 @@
 
 hive-board {
   width: 100%;
-  height: 100%;
   display: block;
   -webkit-box-flex: 1;
   -webkit-flex: 1 1 auto;
@@ -33,7 +35,8 @@ hive-board {
   -webkit-order: 2;
   -ms-flex-order: 2;
   order: 2;
-  position: relative; }
+  position: relative;
+  overflow: hidden; }
   hive-board .insect {
     position: absolute;
     left: 50%;
@@ -42,40 +45,32 @@ hive-board {
     -ms-transform: translate(-50%, -50%);
     transform: translate(-50%, -50%);
     z-index: 200; }
-  hive-board:before, hive-board:after {
-    content: '';
-    width: 100%;
-    background-color: #797979;
-    display: block;
-    height: 22px;
-    z-index: 300;
-    -webkit-transition: background-color 0.5s cubic-bezier(0.3, 0.14, 0.36, 1) 1s;
-    -o-transition: background-color 0.5s cubic-bezier(0.3, 0.14, 0.36, 1) 1s;
-    transition: background-color 0.5s cubic-bezier(0.3, 0.14, 0.36, 1) 1s; }
-  hive-board:before {
+  hive-board .board-sizer {
     position: absolute;
-    bottom: 100%; }
-  hive-board:after {
-    position: fixed;
-    bottom: 0; }
+    background-color: red; }
+
+.is-dragging-board .insect {
+  -webkit-transition: none !important;
+  -o-transition: none !important;
+  transition: none !important; }
 
 hive-player-deck {
   width: 100%;
-  overflow-x: scroll;
-  overflow-y: hidden;
   -webkit-box-flex: 0;
-  -webkit-flex: 0 0 80px;
-  -ms-flex: 0 0 80px;
-  flex: 0 0 80px;
+  -webkit-flex: 0 0 auto;
+  -ms-flex: 0 0 auto;
+  flex: 0 0 auto;
+  height: -webkit-calc(1.73205 * var(--hexagon-size) + 12px);
+  height: calc(1.73205 * var(--hexagon-size) + 12px);
   background-color: #797979;
   -webkit-transition: background-color 0.5s cubic-bezier(0.3, 0.14, 0.36, 1) 1s;
   -o-transition: background-color 0.5s cubic-bezier(0.3, 0.14, 0.36, 1) 1s;
   transition: background-color 0.5s cubic-bezier(0.3, 0.14, 0.36, 1) 1s;
   text-align: center;
   white-space: nowrap;
-  padding-top: 40px;
-  padding-bottom: 40px;
-  font-size: 0; }
+  font-size: 0;
+  overflow: hidden;
+  position: relative; }
   hive-player-deck[player="1"] {
     -webkit-box-ordinal-group: 2;
     -webkit-order: 1;
@@ -118,24 +113,26 @@ hive-player-deck {
     -webkit-transition-delay: 1s;
     -o-transition-delay: 1s;
     transition-delay: 1s; }
-  hive-board:not([current-player="1"]) ~ hive-player-deck[player="1"] .insect,
-  hive-board:not([current-player="2"]) ~ hive-player-deck[player="2"] .insect {
-    opacity: 0.5;
-    -webkit-filter: grayscale(90%);
-    filter: grayscale(90%);
-    pointer-events: none;
-    -ms-touch-action: none;
-    touch-action: none;
-    -webkit-transition-delay: 1s;
-    -o-transition-delay: 1s;
-    transition-delay: 1s; }
-
-hive-board[current-player="1"]:before,
-hive-board[current-player="2"]:after {
-  background-color: #a0a0a0;
-  -webkit-transition-delay: 1s;
-  -o-transition-delay: 1s;
-  transition-delay: 1s; }
+  hive-board:not([current-player="1"]) ~ hive-player-deck[player="1"],
+  hive-board:not([current-player="2"]) ~ hive-player-deck[player="2"] {
+    pointer-events: none; }
+    hive-board:not([current-player="1"]) ~ hive-player-deck[player="1"] .insect,
+    hive-board:not([current-player="2"]) ~ hive-player-deck[player="2"] .insect {
+      opacity: 0.5;
+      -webkit-filter: grayscale(90%);
+      filter: grayscale(90%);
+      pointer-events: none;
+      -ms-touch-action: none;
+      touch-action: none;
+      -webkit-transition-delay: 1s;
+      -o-transition-delay: 1s;
+      transition-delay: 1s; }
+  hive-player-deck .hive-playeer-deck-inner {
+    position: relative;
+    height: -webkit-calc(100% + 20px);
+    height: calc(100% + 20px);
+    overflow-x: auto;
+    overflow-y: hidden; }
 
 @-webkit-keyframes fadeIn {
   from {
@@ -250,15 +247,22 @@ hive-board[current-player="2"]:after {
   position: relative;
   top: 0;
   left: 0;
-  -webkit-transition: opacity .8s ease-in-out, -webkit-transform .8s ease-in-out;
-  transition: opacity .8s ease-in-out, -webkit-transform .8s ease-in-out;
-  -o-transition: opacity .8s ease-in-out, transform .8s ease-in-out;
-  transition: opacity .8s ease-in-out, transform .8s ease-in-out;
-  transition: opacity .8s ease-in-out, transform .8s ease-in-out, -webkit-transform .8s ease-in-out;
+  -webkit-transition: opacity 0.8s ease-in-out, -webkit-transform 0.8s cubic-bezier(0.31, 0.26, 0.56, 0.35);
+  transition: opacity 0.8s ease-in-out, -webkit-transform 0.8s cubic-bezier(0.31, 0.26, 0.56, 0.35);
+  -o-transition: opacity 0.8s ease-in-out, transform 0.8s cubic-bezier(0.31, 0.26, 0.56, 0.35);
+  transition: opacity 0.8s ease-in-out, transform 0.8s cubic-bezier(0.31, 0.26, 0.56, 0.35);
+  transition: opacity 0.8s ease-in-out, transform 0.8s cubic-bezier(0.31, 0.26, 0.56, 0.35), -webkit-transform 0.8s cubic-bezier(0.31, 0.26, 0.56, 0.35);
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none; }
+  .insect .insect-inner {
+    -webkit-transition: opacity 0.8s ease-in-out, -webkit-transform 0.8s cubic-bezier(0.31, 0.26, 0.66, 0.97);
+    transition: opacity 0.8s ease-in-out, -webkit-transform 0.8s cubic-bezier(0.31, 0.26, 0.66, 0.97);
+    -o-transition: opacity 0.8s ease-in-out, transform 0.8s cubic-bezier(0.31, 0.26, 0.66, 0.97);
+    transition: opacity 0.8s ease-in-out, transform 0.8s cubic-bezier(0.31, 0.26, 0.66, 0.97);
+    transition: opacity 0.8s ease-in-out, transform 0.8s cubic-bezier(0.31, 0.26, 0.66, 0.97), -webkit-transform 0.8s cubic-bezier(0.31, 0.26, 0.66, 0.97);
+    position: relative; }
   .insect .debug {
     position: absolute;
     top: 50%;
@@ -335,6 +339,7 @@ hive-board[current-player="2"]:after {
     .insect.highlight.fade-out {
       opacity: 0; }
   .insect.disappear {
+    overflow: hidden;
     -webkit-animation: disappear .7s forwards;
     animation: disappear .7s forwards; }
     .insect.disappear:first-child {
@@ -352,10 +357,11 @@ body > .insect {
 
 .shadow-left,
 .shadow-right {
-  width: 40px;
+  width: 100px;
   height: 160px;
   position: absolute;
   top: 0;
+  pointer-events: none;
   opacity: 0;
   z-index: 403;
   -webkit-transition: opacity 0.5s ease-in-out;

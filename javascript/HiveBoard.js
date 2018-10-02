@@ -1,11 +1,35 @@
 import { State } from './State.js';
 import { Helpers } from './Helpers.js';
+import { TouchScroll } from './TouchScroll.js';
 
 customElements.define('hive-board', class HiveBoard extends HTMLElement {
   constructor() {
     super();
 
     this.state = new State(this);
+    this.boardSizer = document.createElement('div');
+    this.boardSizer.classList.add('board-sizer');
+    this.pieceOffsetX = 0;
+    this.pieceOffsetY = 0;
+    this.appendChild(this.boardSizer);
+  }
+
+  connectedCallback () {
+    this.addEventListener('touchDrag', () => {
+      document.body.classList.add('is-dragging-board');
+
+      Array.from(this.children).forEach((child) => {
+        if (child.applyPosition) {
+          child.applyPosition();
+        }
+      });
+    });
+
+    this.addEventListener('touchDragRelease', () => {
+      document.body.classList.remove('is-dragging-board');
+    });
+
+    new TouchScroll(this, 'pieceOffsetX', 'pieceOffsetY');
   }
 
   /**
@@ -82,7 +106,7 @@ customElements.define('hive-board', class HiveBoard extends HTMLElement {
     let borderTiles = new Map();
 
     Array.from(this.children).forEach((piece) => {
-      if (!piece.isInRemoval && piece.insectName !== 'highlight') {
+      if (!piece.isInRemoval && piece.insectName !== 'highlight' && piece.nodeName.substring(0, 4) === 'HIVE') {
         // Add all the existing pieces to the ignore list.
         ignoreTiles.set(`column${piece.column}|row${piece.row}`, { column: piece.column, row: piece.row });
 
@@ -156,43 +180,39 @@ customElements.define('hive-board', class HiveBoard extends HTMLElement {
 
     let clonedPiece = piece.cloneNode(true);
     let clonedPieceForPlayer = piece.cloneNode(true);
-    clonedPiece.style.position = 'fixed';
     let clientRect = piece.getBoundingClientRect();
-    clonedPiece.style.transform = `translate(${clientRect.left}px, ${clientRect.top}px)`;
-    document.body.appendChild(clonedPiece);
 
-    piece.parentNode.insertBefore(clonedPieceForPlayer, piece.nextSibling);
-    this.appendChild(piece);
-
-    clonedPieceForPlayer.oneAnimationEnd('disappear', () => {
-      clonedPieceForPlayer.remove();
-      hivePlayer.dispatchEvent(new CustomEvent('attachedPiece'));
-    });
-    clonedPieceForPlayer.classList.add('disappear');
-
-    piece.row = data.row;
-    piece.column = data.column;
-
-    piece.deselect();
-    this.cleanUpHighlights();
-
-    clientRect = piece.getBoundingClientRect();
-    clonedPiece.oneTransitionEnd('transform', () => {
+    setTimeout(() => {
+      document.body.appendChild(clonedPiece);
+      clonedPiece.style.cssText = `transform: translateY(${clientRect.top}px); position: fixed;`;
+      clonedPiece.querySelector('.insect-inner').style.cssText = `transform: translateX(${clientRect.left}px);`;
+      piece.parentNode.insertBefore(clonedPieceForPlayer, piece.nextSibling);
       this.appendChild(piece);
-      clonedPiece.remove();
-      if (typeof callback === 'function') callback();
-    });
-    clonedPiece.style.transform = `translate(${clientRect.left}px, ${clientRect.top}px)`;
-    piece.remove();
-  }
 
-  /**
-   * In this method I want to measure the grid and put an offset in the HiveBoard,
-   * which will be added to each Insect.position()
-   * Maybe there also need to be a transparent div inside the hive-board HTMLelement so the scrollbars are drawn.
-   */
-  resizeAndMove () {
-    console.log('resizeAndMove')
+      clonedPieceForPlayer.oneAnimationEnd('disappear', () => {
+        clonedPieceForPlayer.remove();
+        hivePlayer.dispatchEvent(new CustomEvent('attachedPiece'));
+      });
+      clonedPieceForPlayer.classList.add('disappear');
+
+      piece.row = data.row;
+      piece.column = data.column;
+
+      piece.deselect();
+      this.cleanUpHighlights();
+
+      clientRect = piece.getBoundingClientRect();
+      clonedPiece.oneTransitionEnd('transform', () => {
+        this.appendChild(piece);
+        clonedPiece.remove();
+        if (typeof callback === 'function') callback();
+      });
+
+      clonedPiece.style.transform = `translateY(${clientRect.top}px)`;
+      clonedPiece.querySelector('.insect-inner').style.transform = `translateX(${clientRect.left}px)`;
+
+      piece.remove();
+    }, 100);
   }
 
   /**

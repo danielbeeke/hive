@@ -15,8 +15,8 @@ export class Insect extends HTMLElement {
     this.createMarkup();
 
     if (this.insectName !== 'highlight') {
-      this.addEventListener('click', () => {
-        this.click();
+      this.addEventListener('click', (event) => {
+        if (!this.parentElement.parentElement.dragging) this.click();
       });
     }
   }
@@ -27,7 +27,7 @@ export class Insect extends HTMLElement {
   createMarkup() {
     let f = 0.945;
 
-    this.innerHTML = `<svg class="hexagon-svg" viewBox="0 0 300 260">
+    let output = `<div class="insect-inner"><svg class="hexagon-svg" viewBox="0 0 300 260">
       <polygon 
         class="hexagon-border" 
         points="300,130 225,260 75,260 0,130 75,0 225,0">
@@ -41,15 +41,18 @@ export class Insect extends HTMLElement {
 
     // Add the piece image if needed.
     if (!['highlight'].includes(this.insectName)) {
-      this.innerHTML += `<img src="images/${this.insectName}.png">`
+      output += `<img src="images/${this.insectName}.png">`
     }
 
+    output += `</div>`;
+    this.innerHTML = output;
   }
 
   /**
    * Click event that handles the player turns.
    */
   click () {
+    
     let otherPlayer = this.player === 1 ? 2 : 1;
     if (this.state.currentPlayer === otherPlayer) return;
 
@@ -151,7 +154,7 @@ export class Insect extends HTMLElement {
     let x = column * 75 - 50;
     let y = ((row * 100) - 50) + (column * 50);
 
-    this.setAttribute('style', `transform: translate(${x}%, ${y}%);`);
+    this.setAttribute('style', `transform: translate(${x - this.board.pieceOffsetX}%, ${y - this.board.pieceOffsetY}%);`);
   }
 
   /**
