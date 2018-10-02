@@ -154,7 +154,7 @@ export class Insect extends HTMLElement {
     let x = column * 75 - 50;
     let y = ((row * 100) - 50) + (column * 50);
 
-    this.setAttribute('style', `transform: translate(${x}%, ${y}%);`);    
+    this.setAttribute('style', `transform: translate(${x - this.board.pieceOffsetX}%, ${y - this.board.pieceOffsetY}%);`);
   }
 
   /**

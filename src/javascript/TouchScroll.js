@@ -1,24 +1,15 @@
-/*
- * TouchScroll - using dom overflow:scroll
- * by kmturley
- */
+export let TouchScroll = function (element, changeX = 'scrollLeft', changeY = 'scrollTop') {
 
-/*globals window, document */
-
-export let TouchScroll = function (element) {
-  'use strict';
-  
   let module = {
-      axis: 'x',
       drag: false,
-      zoom: 1,
-      time: 0.04,
+
       /**
        * @method init
        */
-      init: function (element) {
+      init: function (element, changeX, changeY) {
           this.el = element;
-          this.body = document.body;
+          this.changeX = changeX;
+          this.changeY = changeY;
           this.el.addEventListener('mousedown', (e) => { this.onMouseDown(e); });
           this.el.addEventListener('mousemove', (e) => { this.onMouseMove(e); });
           this.el.addEventListener('mouseup', (e) => { this.onMouseUp(e); });
@@ -31,8 +22,8 @@ export let TouchScroll = function (element) {
           if (this.drag === false) {
               this.drag = true;
               e.preventDefault();
-              this.startx = e.clientX + this.el.scrollLeft;
-              this.starty = e.clientY + this.el.scrollTop;
+              this.startx = e.clientX + this.el[this.changeX];
+              this.starty = e.clientY + this.el[this.changeY];
               this.diffx = 0;
               this.diffy = 0;
           }
@@ -43,10 +34,11 @@ export let TouchScroll = function (element) {
       onMouseMove: function (e) {
           if (this.drag === true) {
               e.preventDefault();
-              this.diffx = (this.startx - (e.clientX + this.el.scrollLeft));
-              this.diffy = (this.starty - (e.clientY + this.el.scrollTop));
-              this.el.scrollLeft += this.diffx;
-              this.el.scrollTop += this.diffy;
+              this.diffx = (this.startx - (e.clientX + this.el[this.changeX]));
+              this.diffy = (this.starty - (e.clientY + this.el[this.changeY]));
+              this.el[this.changeX] = this.el[this.changeX] + this.diffx;
+              this.el[this.changeY] = this.el[this.changeY] + this.diffy;
+              this.el.dispatchEvent(new CustomEvent('touchDrag'));
           }
       },
       /**
@@ -58,13 +50,14 @@ export let TouchScroll = function (element) {
               setTimeout(() => {
                 this.diffx = 0;
                 this.diffy = 0;
-                this.drag = false;     
-              }, 100);
+                this.drag = false;
+                this.el.dispatchEvent(new CustomEvent('touchDragRelease'));
+              }, 10);
           }
       },
   };
 
-  module.init(element);
+  module.init(element, changeX, changeY);
 
   return module;
 };

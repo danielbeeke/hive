@@ -9,11 +9,27 @@ customElements.define('hive-board', class HiveBoard extends HTMLElement {
     this.state = new State(this);
     this.boardSizer = document.createElement('div');
     this.boardSizer.classList.add('board-sizer');
+    this.pieceOffsetX = 0;
+    this.pieceOffsetY = 0;
     this.appendChild(this.boardSizer);
   }
 
   connectedCallback () {
-    new TouchScroll(this);
+    this.addEventListener('touchDrag', () => {
+      document.body.classList.add('is-dragging-board');
+
+      Array.from(this.children).forEach((child) => {
+        if (child.applyPosition) {
+          child.applyPosition();
+        }
+      });
+    });
+
+    this.addEventListener('touchDragRelease', () => {
+      document.body.classList.remove('is-dragging-board');
+    });
+
+    new TouchScroll(this, 'pieceOffsetX', 'pieceOffsetY');
   }
 
   /**
@@ -165,74 +181,38 @@ customElements.define('hive-board', class HiveBoard extends HTMLElement {
     let clonedPiece = piece.cloneNode(true);
     let clonedPieceForPlayer = piece.cloneNode(true);
     let clientRect = piece.getBoundingClientRect();
-    document.body.appendChild(clonedPiece);
-    clonedPiece.style.cssText = `transform: translateY(${clientRect.top}px); position: fixed;`;
-    clonedPiece.querySelector('.insect-inner').style.cssText = `transform: translateX(${clientRect.left}px);`;
-    piece.parentNode.insertBefore(clonedPieceForPlayer, piece.nextSibling);
-    this.appendChild(piece);
 
-    clonedPieceForPlayer.oneAnimationEnd('disappear', () => {
-      clonedPieceForPlayer.remove();
-      hivePlayer.dispatchEvent(new CustomEvent('attachedPiece'));
-    });
-    clonedPieceForPlayer.classList.add('disappear');
-
-    piece.row = data.row;
-    piece.column = data.column;
-
-    piece.deselect();
-    this.cleanUpHighlights();
-
-    clientRect = piece.getBoundingClientRect();
-    clonedPiece.oneTransitionEnd('transform', () => {
+    setTimeout(() => {
+      document.body.appendChild(clonedPiece);
+      clonedPiece.style.cssText = `transform: translateY(${clientRect.top}px); position: fixed;`;
+      clonedPiece.querySelector('.insect-inner').style.cssText = `transform: translateX(${clientRect.left}px);`;
+      piece.parentNode.insertBefore(clonedPieceForPlayer, piece.nextSibling);
       this.appendChild(piece);
-      clonedPiece.remove();
-      if (typeof callback === 'function') callback();
-    });
 
-    clonedPiece.style.transform = `translateY(${clientRect.top}px)`;
-    clonedPiece.querySelector('.insect-inner').style.transform = `translateX(${clientRect.left}px)`;
+      clonedPieceForPlayer.oneAnimationEnd('disappear', () => {
+        clonedPieceForPlayer.remove();
+        hivePlayer.dispatchEvent(new CustomEvent('attachedPiece'));
+      });
+      clonedPieceForPlayer.classList.add('disappear');
 
-    piece.remove();
-  }
+      piece.row = data.row;
+      piece.column = data.column;
 
-  /**
-   * In this method I want to measure the grid and put an offset in the HiveBoard,
-   * which will be added to each Insect.position()
-   * Maybe there also need to be a transparent div inside the hive-board HTMLelement so the scrollbars are drawn.
-   */
-  resizeAndMove () {
-    let top = 0, left = 0, bottom = 0, right = 0;
-    Array.from(this.children).forEach((child) => {
-      if (child !== this.boardSizer) {
-        let x = child.column * 75 - 50;
-        let y = ((child.row * 100) - 50) + (child.column * 50);
+      piece.deselect();
+      this.cleanUpHighlights();
 
-        if (top > y) top = y;
-        if (left > x) left = x;
-        if (right < x) right = x;
-        if (bottom < y) bottom = y;
-      }
-    });
+      clientRect = piece.getBoundingClientRect();
+      clonedPiece.oneTransitionEnd('transform', () => {
+        this.appendChild(piece);
+        clonedPiece.remove();
+        if (typeof callback === 'function') callback();
+      });
 
-    let firstPiece = this.querySelector('.insect');
-    let insectCount = this.querySelectorAll('.insect').length;
+      clonedPiece.style.transform = `translateY(${clientRect.top}px)`;
+      clonedPiece.querySelector('.insect-inner').style.transform = `translateX(${clientRect.left}px)`;
 
-    let halfBoardWidth = this.clientWidth / 2;
-    let halfBoardHeight = this.clientHeight / 2;
-
-    let pxTop = halfBoardHeight + top * firstPiece.clientHeight / 100;
-    let pxLeft = halfBoardWidth + left * firstPiece.clientWidth / 100;
-    let pxRight = halfBoardWidth + right * firstPiece.clientWidth / 100;
-    let pxBottom = halfBoardHeight + bottom * firstPiece.clientHeight / 100;
-
-    let padding = 170;
-    let halfPadding = padding / 2;
-
-    this.boardSizer.style.top = pxTop - halfPadding + 'px';
-    this.boardSizer.style.left = pxLeft - halfPadding + 'px';
-    this.boardSizer.style.width = pxRight - pxLeft + (firstPiece.clientWidth / (insectCount > 1 ? 1 : 2)) + padding + 'px';
-    this.boardSizer.style.height = pxBottom - pxTop + (firstPiece.clientHeight / (insectCount > 1 ? 1 : 2)) + padding + 'px';
+      piece.remove();
+    }, 100);
   }
 
   /**

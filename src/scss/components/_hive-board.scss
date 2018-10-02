@@ -16,6 +16,12 @@ hive-board {
 
   .board-sizer {
     position: absolute;
-    // background-color: red;
+     background-color: red;
+  }
+}
+
+.is-dragging-board {
+  .insect {
+    transition: none !important;
   }
 }
