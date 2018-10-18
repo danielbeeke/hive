@@ -67,4 +67,14 @@ hive-player-deck {
     overflow-x: auto;
     overflow-y: hidden;  
   }
+
+  &.should-place-queen {
+    .insect:not(.queen) {
+      opacity: 0.5;
+      filter: grayscale(90%);
+      pointer-events: none;
+      touch-action: none;
+      transition-delay: $delay-from-active-to-inactive;
+    }
+  }
 }

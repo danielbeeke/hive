@@ -29,6 +29,19 @@ customElements.define('hive-board', class HiveBoard extends HTMLElement {
       document.body.classList.remove('is-dragging-board');
     });
 
+    this.addEventListener('transition', () => {
+      let previousPlayerDeck = document.querySelector('.should-place-queen');
+      if (previousPlayerDeck) previousPlayerDeck.classList.remove('should-place-queen');
+
+      let previousTurns = this.state.turns.filter(turn => turn.player === this.state.currentPlayer);
+      let playerDeck = document.querySelector(`hive-player-deck[player="${this.state.currentPlayer}"]`);
+      let queenIsInPlayerDeck = !!playerDeck.querySelector('hive-queen');
+
+      if (previousTurns.length === 3 && queenIsInPlayerDeck) {
+        playerDeck.classList.add('should-place-queen');
+      }
+    });
+
     new TouchScroll(this, 'pieceOffsetX', 'pieceOffsetY');
   }
 
@@ -154,8 +167,6 @@ customElements.define('hive-board', class HiveBoard extends HTMLElement {
       }
     });
 
-    console.log(attachTiles)
-
     this.setHighlights(attachTiles, callback);
   }
 
@@ -186,37 +197,36 @@ customElements.define('hive-board', class HiveBoard extends HTMLElement {
     clonedPieceForPlayer._isClone = true;
     let clientRect = piece.getBoundingClientRect();
 
-    setTimeout(() => {
-      document.body.appendChild(clonedPiece);
-      clonedPiece.style.cssText = `transform: translateY(${clientRect.top}px); position: fixed;`;
-      clonedPiece.querySelector('.insect-inner').style.cssText = `transform: translateX(${clientRect.left}px);`;
-      piece.parentNode.insertBefore(clonedPieceForPlayer, piece.nextSibling);
+    document.body.appendChild(clonedPiece);
+    clonedPiece.style.cssText = `transform: translateY(${clientRect.top}px); position: fixed;`;
+    clonedPiece.querySelector('.insect-inner').style.cssText = `transform: translateX(${clientRect.left}px);`;
+    piece.parentNode.insertBefore(clonedPieceForPlayer, piece.nextSibling);
+    this.appendChild(piece);
+
+    clonedPieceForPlayer.oneAnimationEnd((animationName) => animationName.substr(0, 9) === 'disappear', () => {
+      clonedPieceForPlayer.remove();
+      hivePlayer.dispatchEvent(new CustomEvent('attachedPiece'));
+    });
+
+    clonedPieceForPlayer.classList.add('disappear');
+
+    piece.row = data.row;
+    piece.column = data.column;
+
+    piece.deselect();
+    this.cleanUpHighlights();
+
+    clientRect = piece.getBoundingClientRect();
+    clonedPiece.oneTransitionEnd('transform', () => {
       this.appendChild(piece);
+      clonedPiece.remove();
+      if (typeof callback === 'function') callback();
+    });
 
-      clonedPieceForPlayer.oneAnimationEnd('disappear', () => {
-        clonedPieceForPlayer.remove();
-        hivePlayer.dispatchEvent(new CustomEvent('attachedPiece'));
-      });
-      clonedPieceForPlayer.classList.add('disappear');
+    clonedPiece.style.transform = `translateY(${clientRect.top}px)`;
+    clonedPiece.querySelector('.insect-inner').style.transform = `translateX(${clientRect.left}px)`;
 
-      piece.row = data.row;
-      piece.column = data.column;
-
-      piece.deselect();
-      this.cleanUpHighlights();
-
-      clientRect = piece.getBoundingClientRect();
-      clonedPiece.oneTransitionEnd('transform', () => {
-        this.appendChild(piece);
-        clonedPiece.remove();
-        if (typeof callback === 'function') callback();
-      });
-
-      clonedPiece.style.transform = `translateY(${clientRect.top}px)`;
-      clonedPiece.querySelector('.insect-inner').style.transform = `translateX(${clientRect.left}px)`;
-
-      piece.remove();
-    }, 100);
+    piece.remove();
   }
 
   /**

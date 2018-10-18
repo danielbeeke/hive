@@ -7,6 +7,8 @@ export class State {
       'attachPiece': ['attachPiece', 'movePiece'],
       'movePiece': ['attachPiece', 'movePiece'],
     };
+
+    this.turns = [];
   }
 
   get currentPlayer () {
@@ -44,10 +46,17 @@ export class State {
 
     if (typeof this.board[action] === 'function') {
       this.board[action](data, () => {
-        // If we need post turn callback.
+        this.setPlayerState(playerId, action);
+        this.currentPlayer = otherPlayer;
+
+        this.turns.push({
+          player: playerId,
+          action: action,
+          data: data
+        });
+
+        this.board.dispatchEvent(new CustomEvent('transition'));
       });
-      this.setPlayerState(playerId, action);
-      this.currentPlayer = otherPlayer;
     }
   }
 }

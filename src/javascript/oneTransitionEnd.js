@@ -81,14 +81,19 @@ let animationEndType = whichAnimationEvent();
  * How to use:
  * element.oneAnimationEnd('opacity', () => { console.log('done') })
  *
- * @param animationName
+ * @param animationName may be a name or a callback that returns a bool.
  * @param callback
  * @returns {HTMLElement}
  */
 HTMLElement.prototype.oneAnimationEnd = function(animationName, callback) {
   if (animationEndType) {
+
     let innerCallback = (event) => {
-      if (event.animationName === animationName && event.target === this) {
+      if ((
+        typeof animationName === 'string' && event.animationName === animationName ||
+        typeof animationName === 'function' && animationName(event.animationName) === true) &&
+        event.target === this
+      ) {
         callback();
         this.removeEventListener(animationEndType, innerCallback);
       }
