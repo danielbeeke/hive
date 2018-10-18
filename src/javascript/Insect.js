@@ -2,21 +2,29 @@ import { Helpers } from './Helpers.js'
 
 export class Insect extends HTMLElement {
 
+  constructor () {
+    super();
+    this.events = [];
+    this.movingRules = [
+      // this.canPhysicallyFitThrough,
+      // this.maintainsSwarm,
+      this.isEmptySpot
+    ];
+    this.insectName = this.constructor.name.toLowerCase();
+    this.selected = false;
+  }
+
   /**
    * CustomElement initialisation.
    * Creates the HTML and SVG.
    */
   connectedCallback() {
-    this.events = [];
-    this.movingRules = [];
-    this.insectName = this.constructor.name.toLowerCase();
+    this.createMarkup();
     this.classList.add(this.insectName, 'insect');
 
-    this.createMarkup();
-
-    if (this.insectName !== 'highlight') {
-      this.addEventListener('click', (event) => {
-        if (!this.parentElement.parentElement.dragging) this.click();
+    if (this.insectName !== 'highlight' && this._isClone !== true && !this.events.find(event => event.eventName === 'click')) {
+      this.on('click', (event) => {
+        if (!this.parentElement.parentElement.dragging) this.click(event);
       });
     }
   }
@@ -51,13 +59,21 @@ export class Insect extends HTMLElement {
   /**
    * Click event that handles the player turns.
    */
-  click () {
-    
+  click (event) {
     let otherPlayer = this.player === 1 ? 2 : 1;
     if (this.state.currentPlayer === otherPlayer) return;
 
     let playerState = this.state.getPlayerState(this.player);
     let otherPlayerState = this.state.getPlayerState(otherPlayer);
+    let selectedPiece = document.querySelector(`.selected[player="${this.player}"]`);
+
+    if (selectedPiece) {
+      this.board.deselectAll();
+      if (selectedPiece === this) {
+        this.board.cleanUpHighlights();
+        return;
+      }
+    }
 
     // Starting point of the game.
     if (
@@ -169,8 +185,8 @@ export class Insect extends HTMLElement {
   get row() { if (this.getAttribute('r') !== null) return parseInt(this.getAttribute('r')) }
   set column(value) { this.setAttribute('c', value) }
   get column() { if (this.getAttribute('c') !== null) return parseInt(this.getAttribute('c')) }
-  select() { this.classList.add('selected') }
-  deselect() { this.classList.remove('selected') }
+  select() { this.classList.add('selected'); this.selected = true; }
+  deselect() { this.classList.remove('selected'); this.selected = false; }
 
   /**
    * We needed a way to remove event callbacks, for this you need the callback inside removeEventListener.
@@ -203,7 +219,7 @@ export class Insect extends HTMLElement {
     let coordinates = this.board.getSwarmNeighbouringTiles();
 
     Array.from(this.board.children).forEach((piece) => {
-      if (piece.insectName !== 'highlight' && piece !== this) {
+      if (piece.insectName !== 'highlight' && piece !== this && piece.nodeName.substring(0, 4) === 'HIVE') {
         coordinates.set(`column${piece.column}|row${piece.row}`, { column: piece.column, row: piece.row });
       }
     });
@@ -229,9 +245,9 @@ export class Insect extends HTMLElement {
    * @param neighbouringCoordinates
    * @returns {boolean}
    */
-  canPhysicallyFitThrough (coordinate, neighbouringCoordinates) {
+    canPhysicallyFitThrough (coordinate, neighbouringCoordinates) {
     // For each step we need to check if the surrounding tiles are enclosing the path.
-    console.log(coordinate)
+    // console.log(coordinate)
     return true;
   }
 
@@ -265,7 +281,7 @@ export class Insect extends HTMLElement {
    * @returns {boolean}
    */
   isNeighbour (coordinate, neighbouringCoordinates) {
-    console.log(neighbouringCoordinates, `column${coordinate.column}|row${coordinate.row}`)
+    // console.log(neighbouringCoordinates, `column${coordinate.column}|row${coordinate.row}`)
     return neighbouringCoordinates.has(`column${coordinate.column}|row${coordinate.row}`);
   }
 }

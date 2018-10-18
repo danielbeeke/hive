@@ -21,7 +21,7 @@ hive-board {
 }
 
 .is-dragging-board {
-  .insect {
+  hive-board .insect {
     transition: none !important;
   }
 }

@@ -154,6 +154,8 @@ customElements.define('hive-board', class HiveBoard extends HTMLElement {
       }
     });
 
+    console.log(attachTiles)
+
     this.setHighlights(attachTiles, callback);
   }
 
@@ -179,7 +181,9 @@ customElements.define('hive-board', class HiveBoard extends HTMLElement {
     let hivePlayer = piece.parentNode;
 
     let clonedPiece = piece.cloneNode(true);
+    clonedPiece._isClone = true;
     let clonedPieceForPlayer = piece.cloneNode(true);
+    clonedPieceForPlayer._isClone = true;
     let clientRect = piece.getBoundingClientRect();
 
     setTimeout(() => {
