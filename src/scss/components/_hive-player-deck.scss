@@ -71,7 +71,7 @@ hive-player-deck {
   &.should-place-queen {
     .insect:not(.queen) {
       opacity: 0.5;
-      filter: grayscale(90%);
+      filter: grayscale(90%) blur(3px);
       pointer-events: none;
       touch-action: none;
       transition-delay: $delay-from-active-to-inactive;

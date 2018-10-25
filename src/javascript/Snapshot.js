@@ -38,7 +38,7 @@ class Snapshot {
       Array.from(element.children).forEach(child => {
         child.nodeName.substr(0, 4) !== 'HIVE' ? child.remove() : cleanUp(child);
       });
-    }
+    };
 
     cleanUp(clonedApp);
     localStorage.setItem('snapshot', clonedApp.innerHTML);

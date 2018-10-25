@@ -218,10 +218,8 @@ export class Insect extends HTMLElement {
   getHighlights() {
     let coordinates = this.board.getSwarmNeighbouringTiles();
 
-    Array.from(this.board.children).forEach((piece) => {
-      if (piece.insectName !== 'highlight' && piece !== this && piece.nodeName.substring(0, 4) === 'HIVE') {
-        coordinates.set(`column${piece.column}|row${piece.row}`, { column: piece.column, row: piece.row });
-      }
+    this.board.pieces.forEach((piece) => {
+      coordinates.set(`column${piece.column}|row${piece.row}`, { column: piece.column, row: piece.row });
     });
 
     coordinates.forEach((coordinate) => {
@@ -247,7 +245,6 @@ export class Insect extends HTMLElement {
    */
     canPhysicallyFitThrough (coordinate, neighbouringCoordinates) {
     // For each step we need to check if the surrounding tiles are enclosing the path.
-    // console.log(coordinate)
     return true;
   }
 
@@ -281,7 +278,20 @@ export class Insect extends HTMLElement {
    * @returns {boolean}
    */
   isNeighbour (coordinate, neighbouringCoordinates) {
-    // console.log(neighbouringCoordinates, `column${coordinate.column}|row${coordinate.row}`)
     return neighbouringCoordinates.has(`column${coordinate.column}|row${coordinate.row}`);
+  }
+
+  /**
+   * Fades out the tile and reomves it afterwards.
+   */
+  fadeOut () {
+    this.isInRemoval = true;
+
+    this.oneTransitionEnd('opacity', () => {
+      this.removeAllEvents();
+      this.remove();
+    });
+
+    this.classList.add('fade-out');
   }
 }

@@ -18,10 +18,8 @@ customElements.define('hive-board', class HiveBoard extends HTMLElement {
     this.addEventListener('touchDrag', () => {
       document.body.classList.add('is-dragging-board');
 
-      Array.from(this.children).forEach((child) => {
-        if (child.applyPosition) {
-          child.applyPosition();
-        }
+      this.tiles.forEach((child) => {
+        child.applyPosition();
       });
     });
 
@@ -37,6 +35,9 @@ customElements.define('hive-board', class HiveBoard extends HTMLElement {
       let playerDeck = document.querySelector(`hive-player-deck[player="${this.state.currentPlayer}"]`);
       let queenIsInPlayerDeck = !!playerDeck.querySelector('hive-queen');
 
+      /**
+       * Game rule, the queen should be placed in turn 4.
+       */
       if (previousTurns.length === 3 && queenIsInPlayerDeck) {
         playerDeck.classList.add('should-place-queen');
       }
@@ -50,15 +51,7 @@ customElements.define('hive-board', class HiveBoard extends HTMLElement {
    */
   cleanUpHighlights() {
     let highlights = Array.from(this.children).filter(child => child.insectName === 'highlight');
-    highlights.forEach(highlight => {
-      highlight.isInRemoval = true;
-      highlight.oneTransitionEnd('opacity', () => {
-        highlight.removeAllEvents();
-        highlight.remove();
-      });
-
-      highlight.classList.add('fade-out');
-    });
+    highlights.forEach(highlight => highlight.fadeOut());
   }
 
   /**
@@ -99,16 +92,28 @@ customElements.define('hive-board', class HiveBoard extends HTMLElement {
 
     this.querySelectorAll('hive-highlight').forEach((highlightTile) => {
       if (tiles.has(`column${highlightTile.column}|row${highlightTile.row}`) === false) {
-        highlightTile.isInRemoval = true;
-        
-        highlightTile.oneTransitionEnd('opacity', () => {
-          highlightTile.removeAllEvents();
-          highlightTile.remove();
-        });
-
-        highlightTile.classList.add('fade-out');
+        highlightTile.fadeOut();
       }
     });
+  }
+
+  /**
+   * Returns all tiles including highlights.
+   * @returns {Insect[]}
+   */
+  get tiles () {
+    return Array.from(this.children).filter(piece => piece.nodeName.substring(0, 4) === 'HIVE');
+  }
+
+  /**
+   * Returns all pieces excluding highlight tiles.
+   * @returns {Insect[]}
+   */
+  get pieces() {
+    return Array.from(this.children).filter(piece => !piece.isInRemoval &&
+      piece.insectName !== 'highlight' &&
+      piece.nodeName.substring(0, 4) === 'HIVE'
+    );
   }
 
   /**
@@ -118,7 +123,7 @@ customElements.define('hive-board', class HiveBoard extends HTMLElement {
     let ignoreTiles = new Map();
     let borderTiles = new Map();
 
-    Array.from(this.children).forEach((piece) => {
+    this.pieces.forEach((piece) => {
       if (!piece.isInRemoval && piece.insectName !== 'highlight' && piece.nodeName.substring(0, 4) === 'HIVE') {
         // Add all the existing pieces to the ignore list.
         ignoreTiles.set(`column${piece.column}|row${piece.row}`, { column: piece.column, row: piece.row });
