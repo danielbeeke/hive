@@ -25,6 +25,10 @@ export class Helpers {
     return neighbourMap;
   }
 
+  static getPathToCoordinate (a, b, grid) {
+    console.log(a, b, grid)
+  }
+
   /**
    * Returns a Map of coordinates for circle board for debugging.
    * The more circles the bigger the board.

@@ -224,7 +224,7 @@ export class Insect extends HTMLElement {
 
     coordinates.forEach((coordinate) => {
       const neighbouringCoordinates = Helpers.getNeighbouringCoordinates(this.column, this.row);
-      const moveIsAllowed = (movingRule) => movingRule(coordinate, neighbouringCoordinates);
+      const moveIsAllowed = (movingRule) => movingRule(coordinate, neighbouringCoordinates, this);
 
       if (!this.movingRules.every(moveIsAllowed)) {
         coordinates.delete(`column${coordinate.column}|row${coordinate.row}`);
@@ -234,6 +234,17 @@ export class Insect extends HTMLElement {
     return coordinates;
   }
 
+  /**
+   * Returns the coordinate of this insect.
+   * @returns {{column, row}}
+   */
+  toCoordinate () {
+    return {
+      column: this.column,
+      row: this.row
+    }
+  }
+
 
   /**
    * Game rule:
@@ -241,11 +252,14 @@ export class Insect extends HTMLElement {
    *
    * @param coordinate
    * @param neighbouringCoordinates
+   * @param self
    * @returns {boolean}
    */
-    canPhysicallyFitThrough (coordinate, neighbouringCoordinates) {
-    // For each step we need to check if the surrounding tiles are enclosing the path.
-    return true;
+  canPhysicallyFitThrough (coordinate, neighbouringCoordinates, self) {
+    let tiles = self.board.getSwarmNeighbouringTiles();
+    let grid = Array.from(tiles.values());
+    let path = Helpers.getPathToCoordinate(coordinate, self.toCoordinate(), grid);
+    return !!path;
   }
 
   /**

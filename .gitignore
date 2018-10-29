@@ -5,3 +5,4 @@ dist
 .vscode
 .publish
 shrinkwrap.yaml
+yarn.lock

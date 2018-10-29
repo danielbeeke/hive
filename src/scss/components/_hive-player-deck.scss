@@ -77,4 +77,6 @@ hive-player-deck {
       transition-delay: $delay-from-active-to-inactive;
     }
   }
+
+  // TODO pointer-events none on the currently placed tiles when the queen needs to be placed.
 }
