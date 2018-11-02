@@ -53,9 +53,10 @@ let transitionEndType = whichTransitionEvent();
  *
  * @param property
  * @param callback
+ * @param cssClassName
  * @returns {HTMLElement}
  */
-HTMLElement.prototype.oneTransitionEnd = function(property, callback) {
+HTMLElement.prototype.oneTransitionEnd = function(property, callback, cssClassName = false) {
   if (transitionEndType) {
     let innerCallback = (event) => {
       if (event.propertyName.substr(-(property.length)) === property && event.target === this) {
@@ -67,6 +68,12 @@ HTMLElement.prototype.oneTransitionEnd = function(property, callback) {
     this.addEventListener(transitionEndType, innerCallback);
   } else {
     callback();
+  }
+
+  if (cssClassName) {
+    setTimeout(() => {
+      this.classList.add(cssClassName);
+    }, 40);
   }
 
   return this;
@@ -83,9 +90,10 @@ let animationEndType = whichAnimationEvent();
  *
  * @param animationName may be a name or a callback that returns a bool.
  * @param callback
+ * @param cssClassName
  * @returns {HTMLElement}
  */
-HTMLElement.prototype.oneAnimationEnd = function(animationName, callback) {
+HTMLElement.prototype.oneAnimationEnd = function(animationName, callback, cssClassName) {
   if (animationEndType) {
 
     let innerCallback = (event) => {
@@ -102,6 +110,12 @@ HTMLElement.prototype.oneAnimationEnd = function(animationName, callback) {
     this.addEventListener(animationEndType, innerCallback);
   } else {
     callback();
+  }
+
+  if (cssClassName) {
+    setTimeout(() => {
+      this.classList.add(cssClassName);
+    }, 40);
   }
 
   return this;

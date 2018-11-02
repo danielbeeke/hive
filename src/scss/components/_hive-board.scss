@@ -14,9 +14,10 @@ hive-board {
     z-index: 200;
   }
 
-  .board-sizer {
-    position: absolute;
-     background-color: red;
+  &.should-place-queen {
+    .insect:not(.highlight) {
+      pointer-events: none;
+    }
   }
 }
 

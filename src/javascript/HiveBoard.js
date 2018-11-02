@@ -28,6 +28,8 @@ customElements.define('hive-board', class HiveBoard extends HTMLElement {
     });
 
     this.addEventListener('transition', () => {
+      this.classList.remove('should-place-queen');
+
       let previousPlayerDeck = document.querySelector('.should-place-queen');
       if (previousPlayerDeck) previousPlayerDeck.classList.remove('should-place-queen');
 
@@ -40,6 +42,7 @@ customElements.define('hive-board', class HiveBoard extends HTMLElement {
        */
       if (previousTurns.length === 3 && queenIsInPlayerDeck) {
         playerDeck.classList.add('should-place-queen');
+        this.classList.add('should-place-queen');
       }
     });
 
@@ -182,7 +185,21 @@ customElements.define('hive-board', class HiveBoard extends HTMLElement {
    * @param callback
    */
   movePiece (data, callback) {
-    this.attachPiece(data, callback);
+    this.cleanUpHighlights();
+
+    let piece = data.piece;
+
+    let x = data.column * 75 - 50;
+    let y = ((data.row * 100) - 50) + (data.column * 50);
+
+    piece.oneTransitionEnd('transform', () => {
+      if (typeof callback === 'function') callback();
+      piece.row = data.row;
+      piece.column = data.column;
+      piece.deselect();
+    });
+
+    piece.setAttribute('style', `transform: translate(${x - this.pieceOffsetX}%, ${y - this.pieceOffsetY}%); z-index: 201;`);
   }
 
   /**

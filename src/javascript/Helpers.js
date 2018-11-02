@@ -1,3 +1,5 @@
+import { Graph } from "./Astar.js";
+
 export class Helpers {
 
   /**
@@ -25,8 +27,34 @@ export class Helpers {
     return neighbourMap;
   }
 
+  /**
+   * See https://www.redblobgames.com/pathfinding/a-star/introduction.html
+   * https://briangrinstead.com/blog/astar-search-algorithm-in-javascript/
+   * @param a
+   * @param b
+   * @param grid
+   */
   static getPathToCoordinate (a, b, grid) {
-    console.log(a, b, grid)
+    let graph = new Graph(grid);
+    let start = graph.grid[a.row][a.column];
+    let end = graph.grid[b.row][b.column];
+    let result = graph.astar.search(graph, start, end);
+    console.log(result)
+  }
+
+  static getFilteredNeighbouringCoordinates (coordinate, grid) {
+    let neighbours = Array.from(Helpers.getNeighbouringCoordinates(coordinate.column, coordinate.row).values());
+
+    let intersection = [];
+
+    neighbours.forEach((neighbour) => {
+      let found = grid.find(item => item.column === neighbour.column && item.row === neighbour.row);
+      if (found) {
+        intersection.push(found);
+      }
+    });
+
+    return intersection;
   }
 
   /**

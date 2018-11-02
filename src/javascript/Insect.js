@@ -304,8 +304,6 @@ export class Insect extends HTMLElement {
     this.oneTransitionEnd('opacity', () => {
       this.removeAllEvents();
       this.remove();
-    });
-
-    this.classList.add('fade-out');
+    }, 'fade-out');
   }
 }

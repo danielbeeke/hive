@@ -36,7 +36,7 @@ class Snapshot {
     let cleanUp = (element) => {
       element.removeAttribute('class');
       Array.from(element.children).forEach(child => {
-        child.nodeName.substr(0, 4) !== 'HIVE' ? child.remove() : cleanUp(child);
+        child.nodeName.substr(0, 4) !== 'HIVE' && !child.classList.contains('hive-playeer-deck-inner') ? child.remove() : cleanUp(child);
       });
     };
 
