@@ -141,7 +141,6 @@ export function Graph(gridIn, options) {
   options = options || {};
   this.nodes = [];
   this.astar = astar;
-  this.diagonal = !!options.diagonal;
   this.grid = [];
 
   gridIn.forEach((item) => {
@@ -181,50 +180,29 @@ Graph.prototype.neighbors = function(node) {
   var y = node.y;
   var grid = this.grid;
 
-    //
-  // West
   if (grid[x - 1] && grid[x - 1][y]) {
     ret.push(grid[x - 1][y]);
   }
 
-  // East
   if (grid[x + 1] && grid[x + 1][y]) {
     ret.push(grid[x + 1][y]);
   }
 
-  // South
   if (grid[x] && grid[x][y - 1]) {
     ret.push(grid[x][y - 1]);
   }
 
-  // North
   if (grid[x] && grid[x][y + 1]) {
     ret.push(grid[x][y + 1]);
   }
 
-  if (this.diagonal) {
-    // Southwest
-    if (grid[x - 1] && grid[x - 1][y - 1]) {
-      ret.push(grid[x - 1][y - 1]);
-    }
-
-    // Southeast
-    if (grid[x + 1] && grid[x + 1][y - 1]) {
-      ret.push(grid[x + 1][y - 1]);
-    }
-
-    // Northwest
-    if (grid[x - 1] && grid[x - 1][y + 1]) {
-      ret.push(grid[x - 1][y + 1]);
-    }
-
-    // Northeast
-    if (grid[x + 1] && grid[x + 1][y + 1]) {
-      ret.push(grid[x + 1][y + 1]);
-    }
+  if (grid[x + 1] && grid[x + 1][y - 1]) {
+    ret.push(grid[x + 1][y - 1]);
   }
 
-  console.log(ret)
+  if (grid[x - 1] && grid[x - 1][y + 1]) {
+    ret.push(grid[x - 1][y + 1]);
+  }
 
   return ret;
 };

@@ -35,11 +35,7 @@ export class Helpers {
    * @param grid
    */
   static getPathToCoordinate (a, b, grid) {
-    let graph = new Graph(grid);
-    let start = graph.grid[a.row][a.column];
-    let end = graph.grid[b.row][b.column];
-    let result = graph.astar.search(graph, start, end);
-    console.log(result)
+
   }
 
   static getFilteredNeighbouringCoordinates (coordinate, grid) {
