@@ -1,7 +1,7 @@
 import {State} from './State.js';
 import {Helpers} from './Helpers.js';
 import {TouchScroll} from './TouchScroll.js';
-import {Astar} from './Astar.js';
+import {Astar, GraphNode} from './Astar.js';
 
 customElements.define('hive-board', class HiveBoard extends HTMLElement {
   constructor() {
@@ -275,32 +275,28 @@ customElements.define('hive-board', class HiveBoard extends HTMLElement {
   }
 
   debugAlgorithm () {
-    let getTile = (r, c) => this.tiles.find(tile => tile.row === r && tile.column === c);
+    let getTile = (coords) => this.tiles.find(tile => tile.row === coords[0] && tile.column === coords[1]);
+
     let graph = this.tiles.map(tile => {
-      return {
-        x: tile.row,
-        y: tile.column
-      };
+      return new GraphNode(tile.row, tile.column);
     });
-    let algorithm = new Astar(graph, 2, 2, 2, -3,
-      (x, y) => {
-      let currentTile = getTile(x, y);
-        if (currentTile) {
-          currentTile.classList.add('current');
-        }
-    }, (x, y) => {
-        let currentTile = getTile(x, y);
 
-        if (currentTile) {
-          currentTile.classList.add('path');
-        }
-    }, (x, y) => {
-        let currentTile = getTile(x, y);
+    let addClassToTile = (coords, className) => {
+      let tile = getTile(coords);
+      if (tile) {
+        tile.classList.add(className);
+      }
+    };
 
-        if (currentTile) {
-          currentTile.classList.add('barrier');
-        }
-      });
+    let algorithm = new Astar({
+      graph: graph,
+      start: [0, 0],
+      goal: [2, -4],
+    });
+
+    // algorithm.addEventListener('test', () => {
+    //   console.log('woop')
+    // });
 
     algorithm.run();
   }
