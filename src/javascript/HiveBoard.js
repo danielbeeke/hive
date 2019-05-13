@@ -1,6 +1,7 @@
-import { State } from './State.js';
-import { Helpers } from './Helpers.js';
-import { TouchScroll } from './TouchScroll.js';
+import {State} from './State.js';
+import {Helpers} from './Helpers.js';
+import {TouchScroll} from './TouchScroll.js';
+import {Astar} from './Astar.js';
 
 customElements.define('hive-board', class HiveBoard extends HTMLElement {
   constructor() {
@@ -12,9 +13,11 @@ customElements.define('hive-board', class HiveBoard extends HTMLElement {
     this.pieceOffsetX = 0;
     this.pieceOffsetY = 0;
     this.appendChild(this.boardSizer);
+    this.debugPlacement();
+    this.debugAlgorithm();
   }
 
-  connectedCallback () {
+  connectedCallback() {
     this.addEventListener('touchDrag', () => {
       document.body.classList.add('is-dragging-board');
 
@@ -60,7 +63,7 @@ customElements.define('hive-board', class HiveBoard extends HTMLElement {
   /**
    * Deselects all selected pieces.
    */
-  deselectAll () {
+  deselectAll() {
     let selectedPieces = document.querySelectorAll('.insect.selected');
     Array.from(selectedPieces).forEach((selectedPiece) => {
       selectedPiece.deselect();
@@ -104,7 +107,7 @@ customElements.define('hive-board', class HiveBoard extends HTMLElement {
    * Returns all tiles including highlights.
    * @returns {Insect[]}
    */
-  get tiles () {
+  get tiles() {
     return Array.from(this.children).filter(piece => piece.nodeName.substring(0, 4) === 'HIVE');
   }
 
@@ -129,13 +132,16 @@ customElements.define('hive-board', class HiveBoard extends HTMLElement {
     this.pieces.forEach((piece) => {
       if (!piece.isInRemoval && piece.insectName !== 'highlight' && piece.nodeName.substring(0, 4) === 'HIVE') {
         // Add all the existing pieces to the ignore list.
-        ignoreTiles.set(`column${piece.column}|row${piece.row}`, { column: piece.column, row: piece.row });
+        ignoreTiles.set(`column${piece.column}|row${piece.row}`, {column: piece.column, row: piece.row});
 
         // For each existing piece get the neighbours.
         let neighbours = Helpers.getNeighbouringCoordinates(piece.column, piece.row);
 
         neighbours.forEach((neighbour) => {
-          borderTiles.set(`column${neighbour.column}|row${neighbour.row}`, { column: neighbour.column, row: neighbour.row });
+          borderTiles.set(`column${neighbour.column}|row${neighbour.row}`, {
+            column: neighbour.column,
+            row: neighbour.row
+          });
         })
       }
     });
@@ -171,7 +177,10 @@ customElements.define('hive-board', class HiveBoard extends HTMLElement {
       });
 
       if (mayUsed) {
-        attachTiles.set(`column${borderTile.column}|row${borderTile.row}`, { column: borderTile.column, row: borderTile.row });
+        attachTiles.set(`column${borderTile.column}|row${borderTile.row}`, {
+          column: borderTile.column,
+          row: borderTile.row
+        });
       }
     });
 
@@ -184,7 +193,7 @@ customElements.define('hive-board', class HiveBoard extends HTMLElement {
    * @param data
    * @param callback
    */
-  movePiece (data, callback) {
+  movePiece(data, callback) {
     this.cleanUpHighlights();
 
     let piece = data.piece;
@@ -255,7 +264,7 @@ customElements.define('hive-board', class HiveBoard extends HTMLElement {
    * Create a circle of tiles for debugging purposes.
    */
   debugPlacement() {
-    let tiles = Helpers.getBoard(2);
+    let tiles = Helpers.getBoard(3);
 
     tiles.forEach((tile) => {
       let pieceToAttach = document.createElement('hive-highlight');
@@ -263,6 +272,18 @@ customElements.define('hive-board', class HiveBoard extends HTMLElement {
       pieceToAttach.row = tile.row;
       this.appendChild(pieceToAttach);
     });
+  }
+
+  debugAlgorithm () {
+    // let getTile = (r, c) => this.tiles.find(tile => tile.row === r && tile.column === c);
+    let graph = this.tiles.map(tile => {
+      return {
+        x: tile.row,
+        y: tile.column
+      };
+    });
+    let algorithm = new Astar(graph, 0, 0);
+    algorithm.run();
   }
 
 });

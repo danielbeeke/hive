@@ -56,7 +56,7 @@ let transitionEndType = whichTransitionEvent();
  * @param cssClassName
  * @returns {HTMLElement}
  */
-HTMLElement.prototype.oneTransitionEnd = function(property, callback, cssClassName = false) {
+HTMLElement.prototype.oneTransitionEnd = function (property, callback, cssClassName = false) {
   if (transitionEndType) {
     let innerCallback = (event) => {
       if (event.propertyName.substr(-(property.length)) === property && event.target === this) {
@@ -93,7 +93,7 @@ let animationEndType = whichAnimationEvent();
  * @param cssClassName
  * @returns {HTMLElement}
  */
-HTMLElement.prototype.oneAnimationEnd = function(animationName, callback, cssClassName) {
+HTMLElement.prototype.oneAnimationEnd = function (animationName, callback, cssClassName) {
   if (animationEndType) {
 
     let innerCallback = (event) => {

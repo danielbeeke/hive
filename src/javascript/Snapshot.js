@@ -1,6 +1,5 @@
-
 class Snapshot {
-  constructor () {
+  constructor() {
 
     /**
      * Other classes get reset when restoring.
@@ -26,7 +25,7 @@ class Snapshot {
   /**
    * Saves the complete state from the DOM because every state thing is an attribute.
    */
-  saveSnapshot () {
+  saveSnapshot() {
     let board = document.querySelector('hive-board');
     board.cleanUpHighlights();
     let app = document.querySelector('.app');
@@ -35,6 +34,7 @@ class Snapshot {
     // We only want the custom elements, everything else is made by the custom elements.
     let cleanUp = (element) => {
       element.removeAttribute('class');
+      element.removeAttribute('style');
       Array.from(element.children).forEach(child => {
         child.nodeName.substr(0, 4) !== 'HIVE' && !child.classList.contains('hive-playeer-deck-inner') ? child.remove() : cleanUp(child);
       });
@@ -47,7 +47,7 @@ class Snapshot {
   /**
    * Restores the complete state from the snapshot because every state thing is an attribute.
    */
-  restoreSnapshot () {
+  restoreSnapshot() {
     let app = document.querySelector('.app');
     app.innerHTML = localStorage.getItem('snapshot');
   }

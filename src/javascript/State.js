@@ -11,12 +11,12 @@ export class State {
     this.turns = [];
   }
 
-  get currentPlayer () {
+  get currentPlayer() {
     let currentPlayer = this.board.getAttribute('current-player');
     return parseInt(currentPlayer);
   }
 
-  set currentPlayer (player) {
+  set currentPlayer(player) {
     this.board.setAttribute('current-player', player);
   }
 

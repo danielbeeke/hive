@@ -1,5 +1,3 @@
-import { Graph } from "./Astar.js";
-
 export class Helpers {
 
   /**
@@ -10,18 +8,18 @@ export class Helpers {
    */
   static getNeighbouringCoordinates(column, row) {
     let neighbours = [
-      { column: column - 1, row: row },
-      { column: column + 1, row: row },
-      { column: column, row: row - 1 },
-      { column: column, row: row + 1 },
-      { column: column + 1, row: row - 1 },
-      { column: column - 1, row: row + 1 },
+      {column: column - 1, row: row},
+      {column: column + 1, row: row},
+      {column: column, row: row - 1},
+      {column: column, row: row + 1},
+      {column: column + 1, row: row - 1},
+      {column: column - 1, row: row + 1},
     ];
 
     let neighbourMap = new Map();
 
     neighbours.forEach((neighbour) => {
-      neighbourMap.set(`column${neighbour.column}|row${neighbour.row}`, { column: neighbour.column, row: neighbour.row });
+      neighbourMap.set(`column${neighbour.column}|row${neighbour.row}`, {column: neighbour.column, row: neighbour.row});
     });
 
     return neighbourMap;
@@ -34,11 +32,11 @@ export class Helpers {
    * @param b
    * @param grid
    */
-  static getPathToCoordinate (a, b, grid) {
+  static getPathToCoordinate(a, b, grid) {
 
   }
 
-  static getFilteredNeighbouringCoordinates (coordinate, grid) {
+  static getFilteredNeighbouringCoordinates(coordinate, grid) {
     let neighbours = Array.from(Helpers.getNeighbouringCoordinates(coordinate.column, coordinate.row).values());
 
     let intersection = [];

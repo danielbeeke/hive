@@ -1,0 +1,69 @@
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes disappearLeft {
+  from {
+    opacity: 0;
+    width: calc(var(--hexagon-size) * 2);
+    margin: 0 5px;
+    margin-left: 40px;
+  }
+
+  to {
+    opacity: 0;
+    width: 0;
+    margin: 0 0;
+    margin-left: 35px;
+  }
+}
+
+@keyframes disappearRight {
+  from {
+    opacity: 0;
+    width: calc(var(--hexagon-size) * 2);
+    margin: 0 5px;
+    margin-right: 40px;
+  }
+
+  to {
+    opacity: 0;
+    width: 0;
+    margin: 0 0;
+    margin-right: 35px;
+  }
+}
+
+@keyframes disappearBoth {
+  from {
+    opacity: 0;
+    width: calc(var(--hexagon-size) * 2);
+    margin: 0 40px;
+  }
+
+  to {
+    opacity: 0;
+    width: 0;
+    margin: 0 35px;
+  }
+}
+
+@keyframes disappear {
+  from {
+    opacity: 0;
+    width: calc(var(--hexagon-size) * 2);
+    margin: 0 5px;
+  }
+
+  to {
+    opacity: 0;
+    width: 0;
+    margin: 0 0;
+  }
+}

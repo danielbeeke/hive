@@ -1,8 +1,8 @@
-import { Helpers } from './Helpers.js'
+import {Helpers} from './Helpers.js'
 
 export class Insect extends HTMLElement {
 
-  constructor () {
+  constructor() {
     super();
     this.events = [];
     this.movingRules = [
@@ -42,8 +42,8 @@ export class Insect extends HTMLElement {
       </polygon>
       <polygon 
         class="hexagon-inner" 
-        points="${300*f},${130*f} ${225*f},${260*f} ${75*f},${260*f} ${0*f},${130*f} ${75*f},${0*f} ${225*f},${0*f}" 
-        transform="translate(${300*(1-f)/2} ${260*(1-f)/2})">
+        points="${300 * f},${130 * f} ${225 * f},${260 * f} ${75 * f},${260 * f} ${0 * f},${130 * f} ${75 * f},${0 * f} ${225 * f},${0 * f}" 
+        transform="translate(${300 * (1 - f) / 2} ${260 * (1 - f) / 2})">
       </polygon>
     </svg>`;
 
@@ -59,7 +59,7 @@ export class Insect extends HTMLElement {
   /**
    * Click event that handles the player turns.
    */
-  click (event) {
+  click(event) {
     let otherPlayer = this.player === 1 ? 2 : 1;
     if (this.state.currentPlayer === otherPlayer) return;
 
@@ -177,16 +177,47 @@ export class Insect extends HTMLElement {
    * All kinds of getters and setters and toggle functions.
    * @returns {*}
    */
-  get state() { return this.board.state }
-  get board() { return document.querySelector('hive-board') }
-  set player(value) { this.setAttribute('player', value) }
-  get player() { return parseInt(this.getAttribute('player')) }
-  set row(value) { this.setAttribute('r', value) }
-  get row() { if (this.getAttribute('r') !== null) return parseInt(this.getAttribute('r')) }
-  set column(value) { this.setAttribute('c', value) }
-  get column() { if (this.getAttribute('c') !== null) return parseInt(this.getAttribute('c')) }
-  select() { this.classList.add('selected'); this.selected = true; }
-  deselect() { this.classList.remove('selected'); this.selected = false; }
+  get state() {
+    return this.board.state
+  }
+
+  get board() {
+    return document.querySelector('hive-board')
+  }
+
+  set player(value) {
+    this.setAttribute('player', value)
+  }
+
+  get player() {
+    return parseInt(this.getAttribute('player'))
+  }
+
+  set row(value) {
+    this.setAttribute('r', value)
+  }
+
+  get row() {
+    if (this.getAttribute('r') !== null) return parseInt(this.getAttribute('r'))
+  }
+
+  set column(value) {
+    this.setAttribute('c', value)
+  }
+
+  get column() {
+    if (this.getAttribute('c') !== null) return parseInt(this.getAttribute('c'))
+  }
+
+  select() {
+    this.classList.add('selected');
+    this.selected = true;
+  }
+
+  deselect() {
+    this.classList.remove('selected');
+    this.selected = false;
+  }
 
   /**
    * We needed a way to remove event callbacks, for this you need the callback inside removeEventListener.
@@ -195,7 +226,7 @@ export class Insect extends HTMLElement {
    * @param callback
    */
   on(eventName, callback) {
-    this.events.push({ eventName, callback });
+    this.events.push({eventName, callback});
     this.addEventListener(eventName, callback);
   }
 
@@ -219,7 +250,7 @@ export class Insect extends HTMLElement {
     let coordinates = this.board.getSwarmNeighbouringTiles();
 
     this.board.pieces.forEach((piece) => {
-      coordinates.set(`column${piece.column}|row${piece.row}`, { column: piece.column, row: piece.row });
+      coordinates.set(`column${piece.column}|row${piece.row}`, {column: piece.column, row: piece.row});
     });
 
     coordinates.forEach((coordinate) => {
@@ -238,7 +269,7 @@ export class Insect extends HTMLElement {
    * Returns the coordinate of this insect.
    * @returns {{column, row}}
    */
-  toCoordinate () {
+  toCoordinate() {
     return {
       column: this.column,
       row: this.row
@@ -255,7 +286,7 @@ export class Insect extends HTMLElement {
    * @param self
    * @returns {boolean}
    */
-  canPhysicallyFitThrough (coordinate, neighbouringCoordinates, self) {
+  canPhysicallyFitThrough(coordinate, neighbouringCoordinates, self) {
     let tiles = self.board.getSwarmNeighbouringTiles();
     let grid = Array.from(tiles.values());
     let path = Helpers.getPathToCoordinate(coordinate, self.toCoordinate(), grid);
@@ -269,7 +300,7 @@ export class Insect extends HTMLElement {
    *
    * @returns {boolean}
    */
-  maintainsSwarm () {
+  maintainsSwarm() {
     return true;
   }
 
@@ -279,7 +310,7 @@ export class Insect extends HTMLElement {
    * Some pieces may not move on top of others.
    * @returns {boolean}
    */
-  isEmptySpot (coordinate) {
+  isEmptySpot(coordinate) {
     let selector = `.insect[c="${coordinate.column}"][r="${coordinate.row}"]`;
     let piece = document.querySelector(selector);
     return !piece;
@@ -291,14 +322,14 @@ export class Insect extends HTMLElement {
    * @param neighbouringCoordinates
    * @returns {boolean}
    */
-  isNeighbour (coordinate, neighbouringCoordinates) {
+  isNeighbour(coordinate, neighbouringCoordinates) {
     return neighbouringCoordinates.has(`column${coordinate.column}|row${coordinate.row}`);
   }
 
   /**
    * Fades out the tile and reomves it afterwards.
    */
-  fadeOut () {
+  fadeOut() {
     this.isInRemoval = true;
 
     this.oneTransitionEnd('opacity', () => {
