@@ -275,14 +275,22 @@ customElements.define('hive-board', class HiveBoard extends HTMLElement {
   }
 
   debugAlgorithm () {
-    // let getTile = (r, c) => this.tiles.find(tile => tile.row === r && tile.column === c);
+    let getTile = (r, c) => this.tiles.find(tile => tile.row === r && tile.column === c);
     let graph = this.tiles.map(tile => {
       return {
         x: tile.row,
         y: tile.column
       };
     });
-    let algorithm = new Astar(graph, 0, 0);
+    let algorithm = new Astar(graph, 0, 0,
+      (x, y) => {
+      let currentTile = getTile(x, y);
+      currentTile.classList.add('current');
+    }, (x, y) => {
+        let currentTile = getTile(x, y);
+        currentTile.classList.add('path');
+    });
+
     algorithm.run();
   }
 

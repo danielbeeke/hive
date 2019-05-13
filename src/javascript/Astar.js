@@ -1,38 +1,72 @@
 export class Astar {
-  constructor (graph, startX, startY) {
+  constructor (graph, startX, startY, onTick = null, onPath = null) {
     this.graph = graph;
     this.frontier = new Queue();
     this.frontier.add(startX, startY);
-    this.visited = {};
-    this.visited[startX + '|' + startY] = true;
+    this.cameFrom = {};
+    this.cameFrom[startX + '|' + startY] = true;
+    this.onTick = onTick;
+    this.onPath = onPath;
   }
 
   run () {
-    while (!this.frontier.empty) {
-      let current = this.frontier.get();
+    this.interval = setInterval(() => {
 
-      if (current) {
-        let neighbours = this.getNeighbours(current.x, current.y);
+      this.doTick();
 
-        neighbours.forEach(neighbour => {
-          if (!this.visited[neighbour.x + '|' + neighbour.y]) {
-            this.frontier.add(neighbour.x, neighbour.y);
-            this.visited[current.x + '|' + current.y] = true;
-          }
-        });
+      if (this.frontier.empty) {
+        clearInterval(this.interval);
+        this.getPathTo(4, -2);
       }
+    }, 40);
+  }
+
+  getPathTo (x, y) {
+    let start = { x: 0, y: 0 };
+    let current = { x: x, y: y };
+    let path = [start];
+    while (current && !(current.x === start.x && current.y === start.y)) {
+      path.push(current);
+      current = this.cameFrom[current.x + '|' + current.y] ? this.cameFrom[current.x + '|' + current.y] : false;
     }
 
-    console.log(this.visited)
+    path.reverse();
+
+    path.forEach(node => {
+      if (this.onPath && typeof this.onPath === 'function') {
+        this.onPath(node.x, node.y);
+      }
+    })
+
+    console.log(this.cameFrom)
   }
-  
+
+  doTick () {
+    let current = this.frontier.get();
+
+    if (current) {
+      let neighbours = this.getNeighbours(current.x, current.y);
+
+      if (this.onTick && typeof this.onTick === 'function') {
+        this.onTick(current.x, current.y);
+      }
+
+      neighbours.forEach(neighbour => {
+        if (!this.cameFrom[neighbour.x + '|' + neighbour.y]) {
+          this.frontier.add(neighbour.x, neighbour.y);
+          this.cameFrom[neighbour.x + '|' + neighbour.y] = current;
+        }
+      });
+    }
+  }
+
   getNeighbours (x, y) {
     let neighbours =  [
       {y: y - 1, x: x},
-      {y: y + 1, x: x},
       {y: y, x: x - 1},
-      {y: y, x: x + 1},
       {y: y + 1, x: x - 1},
+      {y: y + 1, x: x},
+      {y: y, x: x + 1},
       {y: y - 1, x: x + 1},
     ];
 

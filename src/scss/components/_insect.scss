@@ -111,6 +111,20 @@
     }
   }
 
+  &.current {
+    .hexagon-inner {
+      fill: red;
+    }
+  }
+
+
+  &.path {
+    .hexagon-inner {
+      fill: green;
+    }
+  }
+
+
   &.disappear {
     overflow: hidden;
     animation: disappear .7s forwards;
