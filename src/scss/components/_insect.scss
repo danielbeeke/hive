@@ -124,6 +124,11 @@
     }
   }
 
+  &.barrier {
+    .hexagon-inner {
+      //fill: brown !important;
+    }
+  }
 
   &.disappear {
     overflow: hidden;

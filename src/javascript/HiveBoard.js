@@ -264,7 +264,7 @@ customElements.define('hive-board', class HiveBoard extends HTMLElement {
    * Create a circle of tiles for debugging purposes.
    */
   debugPlacement() {
-    let tiles = Helpers.getBoard(3);
+    let tiles = Helpers.getBoard(6);
 
     tiles.forEach((tile) => {
       let pieceToAttach = document.createElement('hive-highlight');
@@ -282,14 +282,25 @@ customElements.define('hive-board', class HiveBoard extends HTMLElement {
         y: tile.column
       };
     });
-    let algorithm = new Astar(graph, 0, 0,
+    let algorithm = new Astar(graph, 2, 2, 2, -3,
       (x, y) => {
       let currentTile = getTile(x, y);
-      currentTile.classList.add('current');
+        if (currentTile) {
+          currentTile.classList.add('current');
+        }
     }, (x, y) => {
         let currentTile = getTile(x, y);
-        currentTile.classList.add('path');
-    });
+
+        if (currentTile) {
+          currentTile.classList.add('path');
+        }
+    }, (x, y) => {
+        let currentTile = getTile(x, y);
+
+        if (currentTile) {
+          currentTile.classList.add('barrier');
+        }
+      });
 
     algorithm.run();
   }
